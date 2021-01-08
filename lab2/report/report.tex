@@ -1,0 +1,71 @@
+\documentclass{article}
+
+% If you're new to LaTeX, here's some short tutorials:
+% https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes
+% https://en.wikibooks.org/wiki/LaTeX/Basics
+
+% Formatting
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage[titletoc,title]{appendix}
+
+% Math
+% https://www.overleaf.com/learn/latex/Mathematical_expressions
+% https://en.wikibooks.org/wiki/LaTeX/Mathematics
+\usepackage{amsmath,amsfonts,amssymb,mathtools}
+
+% Images
+% https://www.overleaf.com/learn/latex/Inserting_Images
+% https://en.wikibooks.org/wiki/LaTeX/Floats,_Figures_and_Captions
+\usepackage{graphicx,float}
+
+% Tables
+% https://www.overleaf.com/learn/latex/Tables
+% https://en.wikibooks.org/wiki/LaTeX/Tables
+
+% Algorithms
+% https://www.overleaf.com/learn/latex/algorithms
+% https://en.wikibooks.org/wiki/LaTeX/Algorithms
+\usepackage[ruled,vlined]{algorithm2e}
+\usepackage{algorithmic}
+
+% Code syntax highlighting
+% https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted
+%\usepackage{minted}
+%\usemintedstyle{borland}
+
+% References
+% https://www.overleaf.com/learn/latex/Bibliography_management_in_LaTeX
+% https://en.wikibooks.org/wiki/LaTeX/Bibliography_Management
+\usepackage{biblatex}
+%\addbibresource{references.bib}
+
+% Title content
+\title{Visual Data Science - Lap Part 2}
+\author{Manuel Eiweck}
+\date{January 15, 2021}
+
+\begin{document}
+
+\maketitle
+
+% Abstract
+%\begin{abstract}
+%    Add your abstract here.
+%\end{abstract}
+
+% Introduction and Overview
+\section{Dataset}
+
+Steam Store Games (Clean dataset)
+Combined data of 27,000 games scraped from Steam and SteamSpy APIs
+https://www.kaggle.com/nikdavis/steam-store-games?select=steam.csv
+
+Gathered around May 2019, it contains most games on the store released prior to that date. Unreleased titles were removed as well as many non-games like software, though some may have slipped through.
+
+Steam Rating
+https://steamdb.info/blog/steamdb-rating/
+
+https://nik-davis.github.io/posts/2019/steam-data-exploration/
+
+\end{document}

@@ -2,3 +2,16 @@
 lab1/~$USDA_Food_Database.xlsx
 lab1/~$b Part 1.docx
 lab1/~WRL3828.tmp
+
+lab2/datasets/*
+
+*.aux
+*.bcf
+*.fdb_latexmk
+*.fls
+*.log
+*.run.xml
+*.bbl
+*.blg
+*.synctex.gz
+lab2/report/report.pdf
