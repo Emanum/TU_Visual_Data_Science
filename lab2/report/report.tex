@@ -1,4 +1,4 @@
-\documentclass{article}
+\documentclass[11pt]{article}
 
 % If you're new to LaTeX, here's some short tutorials:
 % https://www.overleaf.com/learn/latex/Learn_LaTeX_in_30_minutes
@@ -8,6 +8,7 @@
 \usepackage[utf8]{inputenc}
 \usepackage[margin=1in]{geometry}
 \usepackage[titletoc,title]{appendix}
+\usepackage[parfill]{parskip}
 
 % Math
 % https://www.overleaf.com/learn/latex/Mathematical_expressions
@@ -42,7 +43,7 @@
 
 % Title content
 \title{Visual Data Science - Lap Part 2}
-\author{Manuel Eiweck}
+\author{Manuel Eiweck - 01633012}
 \date{January 15, 2021}
 
 \begin{document}
@@ -57,15 +58,16 @@
 % Introduction and Overview
 \section{Dataset}
 
-Steam Store Games (Clean dataset)
-Combined data of 27,000 games scraped from Steam and SteamSpy APIs
-https://www.kaggle.com/nikdavis/steam-store-games?select=steam.csv
+I did choose a dataset containing PC games from the popular store Steam. The dataset was created around May 2019 and contains ~27.000 game entries with each one having 18 attributes.
+However, the dataset is not guaranteed to be complete. In addition, it has been already cleaned from unreleased titles and non-games like software. The original data source was the official Steam API and SteamSpy a website which collects all kind of stats from steam.
 
-Gathered around May 2019, it contains most games on the store released prior to that date. Unreleased titles were removed as well as many non-games like software, though some may have slipped through.
+\subsection{Data preparation}
 
+As the field 'platforms','categories' and 'genres' can contain multiple values I split these columns into one column for each different value. Example: platforms has the values windows, linux and mac, after the preparation I now have 3 columns as a bit mask representing if the game supports that platform. Furthermore, 'owners' has a lower and upper bound therefore I also split that into separated columns. As our data contains a column price we add a cloumn type which is either 'Free' or 'Paid' depending on the value of price is 0 or not.
+
+TODO: score rating
+%\bigbreak
 Steam Rating
 https://steamdb.info/blog/steamdb-rating/
-
-https://nik-davis.github.io/posts/2019/steam-data-exploration/
 
 \end{document}
