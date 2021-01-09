@@ -70,8 +70,58 @@ TODO: score rating
 Steam Rating
 https://steamdb.info/blog/steamdb-rating/
 
-\section{Insight - Increasing number of Free to Play games}
+\section{Insight - generated playtime Free to Play vs Paid games}
 
+\subsection{What is the interesting fact you found in the data?}
+
+I wanted to compare how the total playtime of all users is split between free-to-play and paid games.\\
+I found out that about ~60 percentage comes from Free to play games while 40 percentage comes from paid games. Furthermore, I also found out that there are 3 big games who generate way more playtime alone vs thousands of games together. 
+
+\subsection{Give a brief description how you discovered the
+insight.}
+
+First I added a column 'Total Playtime'. Where Total Playtime is \\
+Total Playtime $=$ average playtime $*$ owners lower bound.\\
+However we have to keep in mind that the actual value of the total playtime doesn't have to be correct. Only the relation to the different games should be useful. 
+Then I created different plots and percentage evaluations to discover and explore the data. 
+
+\subsection{Choose an appropriate visualization to show the insight.}
+
+Figure \ref{fig:insight1_1} shows a bar chart of all games. We can see that Free games generate a bit more playtime than paid games.\\ 
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.5\textwidth]{graphics/insight1_graph1.png}
+    \caption{Bar char of all data.}
+    \label{fig:insight1_1}
+\end{figure}
+
+Figure \ref{fig:insight1_2} shows a bar chart of games separated per release year. This allows us first group our games to see if we can detect some distributions. Interesting is that games released in 2012,2013 and 2017 seems to be very popular. 
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{graphics/insight1_graph2.png}
+    \caption{Bar chart separated for release year.}
+    \label{fig:insight1_2}
+\end{figure}
+
+Figure \ref{fig:insight1_3} shows a bar of the top 10 games ranked by total playtime. We can see that Dota2 released  2013, PlayerUnknown's Battlegrounds released 2017 and Counter-Strike: Global Offensive released 2012 have combined way more total playtime than the rest.\\
+This explains the spikes 2012,2012 and 2017 we saw in the last graph.
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{graphics/insight1_graph3.png}
+    \caption{Bar chart for the top 10 played games.}
+    \label{fig:insight1_3}
+\end{figure}
+
+\subsection{How did you test the statistical significance of the insight?}
+
+(i) Hypothesis:\\
+1. Free to play games have more total Playtime than Paid games.\\
+2. The top 3 Games are played way more than all other games together.\\
+(ii)Tests:\\
+As I have all the data available I decided to just use the calculated percentages\\
+(iii)Check hypothesis:\\
+Free to Play: 61\% vs. Paid: 39\% So we can assume that the first hypothesis is correct.\\
+Playtime of top 3 games:  60\% rest: 40\% So we can assume that the second hypothesis is correct.\\
 
 
 
