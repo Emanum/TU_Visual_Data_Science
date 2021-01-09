@@ -15,3 +15,5 @@ lab2/datasets/*
 *.blg
 *.synctex.gz
 lab2/report/report.pdf
+lab2/dashboard/data/steam.csv
+*.pyc
