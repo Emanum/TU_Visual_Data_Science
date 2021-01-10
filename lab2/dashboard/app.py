@@ -1,6 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+from dash.dependencies import Input, Output
 import plotly.express as px
 import pandas as pd
 import itertools
@@ -31,6 +32,21 @@ pDF = pre_process(df)
 #topPDF = topDataset(50,pDF)
 tptPDF = pDF.sort_values('total_playtime',ascending=False).head(math.ceil(27075*0.01))
 
+
+# INIT Dropdown
+dropdownNumericalValues = [
+    {'label': 'price', 'value': 'price'},
+    {'label': 'owners_low_bound', 'value': 'owners_low_bound'},
+    {'label': 'owners_high_bound', 'value': 'release_year'},
+    {'label': 'release_year', 'value': 'release_year'},
+    {'label': 'required_age', 'value': 'required_age'},
+    {'label': 'achievements', 'value': 'achievements'},
+    {'label': 'average_playtime', 'value': 'average_playtime'},
+    {'label': 'median_playtime', 'value': 'median_playtime'},
+    {'label': 'total_playtime', 'value': 'total_playtime'},
+    {'label': 'estimated_revenue', 'value': 'estimated_revenue'}
+]
+
 # Bar Charts
 barFig = barChartAllYears(pDF)
 
@@ -40,9 +56,20 @@ top=50
 barFig3 = barChartPerYearTopN(pDF,top)
 barFig4 = barChartAllYearsName(pDF,top)
 
+#Boxplot
+boxplot1 = px.box(pDF, y="total_playtime")
+
 # Scatter Charts
 scatter1 = scatterChart(tptPDF,'total_playtime','owners_low_bound',col='top_tag',siz='rating')
 scatter2 = scatterChart(tptPDF,'rating','price',col='developer',siz='windows')
+
+@app.callback(
+    Output("scatter-plot-1", "figure"), 
+    [Input("x-axis-scatter1", "value"), 
+     Input("y-axis-scatter1", "value")])
+def generate_chart(x, y):
+    fig = px.scatter(pDF, x=x, y=y, hover_name="name", hover_data=[x, y])
+    return fig
 
 app.layout = html.Div(children=[
     html.H1(children='Steam Game Data'),
@@ -77,6 +104,12 @@ app.layout = html.Div(children=[
         figure=barFig4
     ),
 
+    html.H1(children='Distribution Total Playtime'),
+        dcc.Graph(
+        id='box-1',
+        figure=boxplot1
+    ),
+
     html.H1(children='Distribution Top 271 Games'),
         dcc.Graph(
         id='scatter-1',
@@ -88,6 +121,22 @@ app.layout = html.Div(children=[
         id='scatter-2',
         figure=scatter2
     ),
+
+    html.P("x-axis:"),
+    dcc.Dropdown(
+        id='x-axis-scatter1', 
+        options=dropdownNumericalValues,
+        value='price'
+        #labelStyle={'display': 'inline-block'}
+    ),
+    html.P("y-axis:"),
+    dcc.Dropdown(
+        id='y-axis-scatter1', 
+        options=dropdownNumericalValues,
+        value='price'
+        #labelStyle={'display': 'inline-block'}
+    ),
+    dcc.Graph(id="scatter-plot-1"),
 
 ])
 
