@@ -37,14 +37,23 @@ tptPDF = pDF.sort_values('total_playtime',ascending=False).head(math.ceil(27075*
 dropdownNumericalValues = [
     {'label': 'price', 'value': 'price'},
     {'label': 'owners_low_bound', 'value': 'owners_low_bound'},
-    {'label': 'owners_high_bound', 'value': 'release_year'},
+    {'label': 'owners_high_bound', 'value': 'owners_high_bound'},
     {'label': 'release_year', 'value': 'release_year'},
+    {'label': 'release_date', 'value': 'release_date'},
     {'label': 'required_age', 'value': 'required_age'},
     {'label': 'achievements', 'value': 'achievements'},
     {'label': 'average_playtime', 'value': 'average_playtime'},
     {'label': 'median_playtime', 'value': 'median_playtime'},
     {'label': 'total_playtime', 'value': 'total_playtime'},
     {'label': 'estimated_revenue', 'value': 'estimated_revenue'}
+]
+
+dropdownLabelValues = [
+    {'label': 'FreeToPlay-Paid', 'value': 'type'},
+    {'label': 'SteamSpy-TopTag', 'value': 'top_tag'},
+    {'label': 'publisher', 'value': 'publisher'},
+    {'label': 'developer', 'value': 'developer'},
+    {'label': 'name', 'value': 'name'}
 ]
 
 # Bar Charts
@@ -60,15 +69,35 @@ barFig4 = barChartAllYearsName(pDF,top)
 boxplot1 = px.box(pDF, y="total_playtime")
 
 # Scatter Charts
-scatter1 = scatterChart(tptPDF,'total_playtime','owners_low_bound',col='top_tag',siz='rating')
-scatter2 = scatterChart(tptPDF,'rating','price',col='developer',siz='windows')
+#scatter1 = scatterChart(tptPDF,'total_playtime','owners_low_bound',col='top_tag',siz='rating')
+#scatter2 = scatterChart(tptPDF,'rating','price',col='developer',siz='windows')
+
+def filterData(df,dataSortBy,dataAscDesc,dataPercent):
+    asc = dataAscDesc == 'asc'
+    rowNr = int(len(df)*(dataPercent/100))
+    return df.sort_values(by=dataSortBy,ascending=asc).head(rowNr)
 
 @app.callback(
     Output("scatter-plot-1", "figure"), 
     [Input("x-axis-scatter1", "value"), 
-     Input("y-axis-scatter1", "value")])
-def generate_chart(x, y):
-    fig = px.scatter(pDF, x=x, y=y, hover_name="name", hover_data=[x, y])
+     Input("y-axis-scatter1", "value"),
+     Input("size-scatter1", "value"),
+     Input("color-scatter1", "value"),
+     Input("config-scatter1", "value"),
+     Input("data-sortBy-scatter1", "value"),
+     Input("data-ascdesc-scatter1", "value"),
+     Input("data-percentage-scatter1", "value"),
+     ])
+def generate_scatter1(x, y,siz,col,config,dataSortBy,dataAscDesc,dataPercent):
+    dataProc = filterData(df,dataSortBy,dataAscDesc,dataPercent)
+    if('color' in config and 'size' in config):
+        fig = px.scatter(dataProc, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=[x, y])
+    elif('color' in config):
+        fig = px.scatter(dataProc, x=x, y=y, color=col,hover_name="name", hover_data=[x, y])
+    elif('size' in config):
+        fig = px.scatter(dataProc, x=x, y=y, size=siz,hover_name="name", hover_data=[x, y])
+    else:
+        fig = px.scatter(dataProc, x=x, y=y,hover_name="name", hover_data=[x, y])
     return fig
 
 app.layout = html.Div(children=[
@@ -104,37 +133,70 @@ app.layout = html.Div(children=[
         figure=barFig4
     ),
 
-    html.H1(children='Distribution Total Playtime'),
+    html.H3(children='Distribution Total Playtime'),
         dcc.Graph(
         id='box-1',
         figure=boxplot1
     ),
 
-    html.H1(children='Distribution Top 271 Games'),
-        dcc.Graph(
-        id='scatter-1',
-        figure=scatter1
-    ),
+    html.H2(children='Customizeable Scatter Plot'),
 
-    html.H1(children='Distribution Top 271 Games'),
-        dcc.Graph(
-        id='scatter-2',
-        figure=scatter2
+    html.H5("Datasource:"),
+    html.P("sortBy:"),
+    dcc.Dropdown(
+        id='data-sortBy-scatter1', 
+        options=dropdownNumericalValues,
+        value='total_playtime'
     ),
-
+    dcc.Dropdown(
+        id='data-ascdesc-scatter1', 
+        options = [
+            {'label': 'asc', 'value': 'asc'},
+            {'label': 'desc', 'value': 'desc'}
+        ],
+        value='desc'
+    ),
+    html.P("percentage of data:"),
+    dcc.Slider(
+        id='data-percentage-scatter1',
+        min=0,
+        max=100,
+        step=1,
+        value=10,
+    ),
     html.P("x-axis:"),
     dcc.Dropdown(
         id='x-axis-scatter1', 
         options=dropdownNumericalValues,
-        value='price'
-        #labelStyle={'display': 'inline-block'}
+        value='total_playtime'
     ),
     html.P("y-axis:"),
     dcc.Dropdown(
         id='y-axis-scatter1', 
         options=dropdownNumericalValues,
+        value='total_playtime'
+    ),
+    html.P("Config:"),
+    dcc.Checklist(
+        id='config-scatter1', 
+        options=[
+            {'label': 'enable color', 'value': 'color'},
+            {'label': 'enable size', 'value': 'size'}
+        ],
+        value=[],
+        labelStyle={'display': 'inline-block'}
+    ),
+    html.P("color:"),
+    dcc.Dropdown(
+        id='color-scatter1', 
+        options=dropdownLabelValues,
+        value='type'
+    ),
+    html.P("size:"),
+    dcc.Dropdown(
+        id='size-scatter1', 
+        options=dropdownNumericalValues,
         value='price'
-        #labelStyle={'display': 'inline-block'}
     ),
     dcc.Graph(id="scatter-plot-1"),
 

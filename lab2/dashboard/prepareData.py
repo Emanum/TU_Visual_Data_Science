@@ -69,6 +69,10 @@ def calc_rating(row):
 
     return score * 100
 
+def handleMultipleItemColumn(df,column,sep):
+    df[column] = df[column].apply(lambda x: x.split(sep))
+
+
 def pre_process(df):
     """Preprocess Steam dataset for exploratory analysis."""
     #df = pd.read_csv(filepath_or_buffer = 'datasets/steam/steam.csv',sep=',', decimal = ".")
@@ -88,7 +92,13 @@ def pre_process(df):
     df['release_year'] = df['release_date'].apply(lambda x: x.year)
     
     # process genres, categories and steamspy_tag columns
-    df = process_cat_gen_tag(df)
+    #df = process_cat_gen_tag(df)
+    handleMultipleItemColumn(df,'platforms',';')
+    handleMultipleItemColumn(df,'categories',';')
+    df['top_tag'] = df['steamspy_tags'].apply(lambda x: x.split(';')[0])
+    handleMultipleItemColumn(df,'steamspy_tags',';')
+    handleMultipleItemColumn(df,'developer',';')
+    handleMultipleItemColumn(df,'publisher',';')
     
     # Create a column to split free vs paid games
     df['type'] = 'Free'
