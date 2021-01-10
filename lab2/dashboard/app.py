@@ -163,6 +163,10 @@ app.layout = html.Div(children=[
         max=100,
         step=1,
         value=10,
+        tooltip={
+            'always_visible':True,
+            'placement':'bottom'
+        }
     ),
     html.P("x-axis:"),
     dcc.Dropdown(
