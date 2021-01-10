@@ -9,6 +9,7 @@ import math
 import numpy as np
 from prepareData import *
 from barchart import *
+from scatterChart import *
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -27,20 +28,28 @@ fig_example = px.bar(df_example, x="Fruit", y="Amount", color="City", barmode="g
 # INIT
 df = pd.read_csv(filepath_or_buffer = '/Users/Manuel 1/Desktop/TU_Visual_Data_Science/lab2/dashboard/data/steam.csv',sep=',', decimal = ".")
 pDF = pre_process(df)
-topPDF = topDataset(50,pDF)
+#topPDF = topDataset(50,pDF)
+tptPDF = pDF.sort_values('total_playtime',ascending=False).head(math.ceil(27075*0.01))
 
-# GRAPH 1
+# Bar Charts
 barFig = barChartAllYears(pDF)
 
 barFig2 = barChartPerYear(pDF)
 
 top=50
 barFig3 = barChartPerYearTopN(pDF,top)
+barFig4 = barChartAllYearsName(pDF,top)
+
+# Scatter Charts
+scatter1 = scatterChart(tptPDF,'total_playtime','owners_low_bound',col='top_tag',siz='rating')
+scatter2 = scatterChart(tptPDF,'rating','price',col='developer',siz='windows')
 
 app.layout = html.Div(children=[
     html.H1(children='Steam Game Data'),
 
     html.H2(children='Total Playtime'),
+
+    html.H4(children='Total Playtime = average_playtime * owners_lower_bound'),
 
     dcc.Graph(
         id='barChart-all',
@@ -59,7 +68,26 @@ app.layout = html.Div(children=[
     dcc.Graph(
         id='barChart-perYearAndName',
         figure=barFig3
-    )
+    ),
+
+    html.H2(children='Total Playtime top 50 Games'),
+
+    dcc.Graph(
+        id='barChart-allTop50',
+        figure=barFig4
+    ),
+
+    html.H1(children='Distribution Top 271 Games'),
+        dcc.Graph(
+        id='scatter-1',
+        figure=scatter1
+    ),
+
+    html.H1(children='Distribution Top 271 Games'),
+        dcc.Graph(
+        id='scatter-2',
+        figure=scatter2
+    ),
 
 ])
 
