@@ -74,7 +74,7 @@ https://steamdb.info/blog/steamdb-rating/
 
 \subsection{What is the interesting fact you found in the data?}
 
-I wanted to compare how the total playtime of all users is split between free-to-play and paid games.\\
+I wanted to compare how the total playtime of all games is split between free-to-play and paid games.\\
 I found out that about ~60 percentage comes from Free to play games while 40 percentage comes from paid games. Furthermore, I also found out that there are 3 big games who generate way more playtime alone vs thousands of games together. 
 
 \subsection{Give a brief description how you discovered the
@@ -123,7 +123,51 @@ As I have all the data available I decided to just use the calculated percentage
 Free to Play: 61\% vs. Paid: 39\% So we can assume that the first hypothesis is correct.\\
 Playtime of top 3 games:  60\% rest: 40\% So we can assume that the second hypothesis is correct.\\
 
+\section{Insight - Rating distribution}
 
+\subsection{What is the interesting fact you found in the data?}
 
+I found out that games with a more recent release date tend to have a lower rating than games with an older release date.\\
+
+\subsection{Give a brief description how you discovered the
+insight.}
+
+As the dataset only includes the count of positive and negative reviews I used the scoring Method from "SteamDB.info" https://steamdb.info/blog/steamdb-rating/ to calculate a score from 0-1. The basic concept is to pull the score stronger towards 0.5 the less total reviews there are. So it should compensate for small  games and make them comparable to large games. 
+
+I first created a scatter plot (see Figure \ref{fig:insight2_1}) with all games and their rating score and release date. Then I added a trend line where a falling trend was first discovered. To make sure this was not only some noise in the data I created additional plots. I decided to compare the number of released games per year from the complete dataset with released games from the top 10 percent rated games. Figure \ref{fig:insight2_2} shows the distribution of the games along the years. Additional, figure \ref{fig:insight2_3} shows the percentage of the released games being in the top 10 percent rated games of all years.  
+
+\begin{figure}
+    \centering
+    \includegraphics[width=1\textwidth]{graphics/insight2_graph1.png}
+    \caption{Scatter plot for all games with rating and release date}
+    \label{fig:insight2_1}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{graphics/insight2_graph2.png}
+    \caption{Scatter plot for all games with rating and release date}
+    \label{fig:insight2_2}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[width=0.5\textwidth]{graphics/insight2_graph3.png}
+    \caption{Scatter plot for all games with rating and release date}
+    \label{fig:insight2_3}
+\end{figure}
+
+\subsection{How did you test the statistical significance of the insight?}
+
+\section{Insight - }
+
+\subsection{What is the interesting fact you found in the data?}
+
+\subsection{Give a brief description how you discovered the
+insight.}
+
+\subsection{Choose an appropriate visualization to show the insight.}
+
+\subsection{How did you test the statistical significance of the insight?}
 
 \end{document}

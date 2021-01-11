@@ -32,12 +32,12 @@ pDF = pre_process(df)
 #topPDF = topDataset(50,pDF)
 tptPDF = pDF.sort_values('total_playtime',ascending=False).head(math.ceil(27075*0.01))
 
-
 # INIT Dropdown
 dropdownNumericalValues = [
     {'label': 'price', 'value': 'price'},
     {'label': 'owners_low_bound', 'value': 'owners_low_bound'},
-    {'label': 'owners_high_bound', 'value': 'owners_high_bound'},
+    {'label': 'release_year', 'value': 'release_year'},
+    {'label': 'rating', 'value': 'rating'},
     {'label': 'release_year', 'value': 'release_year'},
     {'label': 'release_date', 'value': 'release_date'},
     {'label': 'required_age', 'value': 'required_age'},
@@ -55,6 +55,31 @@ dropdownLabelValues = [
     {'label': 'developer', 'value': 'developer'},
     {'label': 'name', 'value': 'name'}
 ]
+
+ascDesc = [
+    {'label': 'asc', 'value': 'asc'},
+    {'label': 'desc', 'value': 'desc'}
+]
+
+infoColumns = [
+    'release_date',
+    'developer',
+    'publisher',
+    'platforms',
+    'required_age',
+    'categories',
+    'genres',
+    'steamspy_tags',
+    'achievements',
+    'positive_ratings',
+    'negative_ratings',
+    'rating',
+    'average_playtime',
+    'median_playtime',
+    'owners_low_bound', 
+    'owners_high_bound',
+    'price'
+ ]
 
 # Bar Charts
 barFig = barChartAllYears(pDF)
@@ -91,14 +116,26 @@ def filterData(df,dataSortBy,dataAscDesc,dataPercent):
 def generate_scatter1(x, y,siz,col,config,dataSortBy,dataAscDesc,dataPercent):
     dataProc = filterData(df,dataSortBy,dataAscDesc,dataPercent)
     if('color' in config and 'size' in config):
-        fig = px.scatter(dataProc, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=[x, y])
+        fig = px.scatter(dataProc, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
     elif('color' in config):
-        fig = px.scatter(dataProc, x=x, y=y, color=col,hover_name="name", hover_data=[x, y])
+        fig = px.scatter(dataProc, x=x, y=y, color=col,hover_name="name", hover_data=infoColumns,trendline="ols")
     elif('size' in config):
-        fig = px.scatter(dataProc, x=x, y=y, size=siz,hover_name="name", hover_data=[x, y])
+        fig = px.scatter(dataProc, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
     else:
-        fig = px.scatter(dataProc, x=x, y=y,hover_name="name", hover_data=[x, y])
+        fig = px.scatter(dataProc, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="ols")
+    fig.update_layout(autosize=True, height=1250)
     return fig
+
+@app.callback(
+    Output("custom-box-plot", "figure"), 
+    [Input("y-axis-box1", "value"), 
+     Input("data-sortBy-box1", "value"),
+     Input("data-ascdesc-box1", "value"),
+     Input("data-percentage-box1", "value")
+     ])
+def generate_box1(y,dataSortBy,dataAscDesc,dataPercent):
+    dataProc = filterData(df,dataSortBy,dataAscDesc,dataPercent)
+    return px.box(dataProc,y=y,hover_name="name", hover_data=infoColumns)
 
 app.layout = html.Div(children=[
     html.H1(children='Steam Game Data'),
@@ -139,7 +176,42 @@ app.layout = html.Div(children=[
         figure=boxplot1
     ),
 
-    html.H2(children='Customizeable Scatter Plot'),
+
+    html.H2(children='Customizable Box Plot'),
+
+    html.H5("Datasource:"),
+    html.P("sortBy:"),
+    dcc.Dropdown(
+        id='data-sortBy-box1', 
+        options=dropdownNumericalValues,
+        value='total_playtime'
+    ),
+    dcc.Dropdown(
+        id='data-ascdesc-box1', 
+        options = ascDesc,
+        value='desc'
+    ),
+    html.P("percentage of data:"),
+    dcc.Slider(
+        id='data-percentage-box1',
+        min=0,
+        max=100,
+        step=1,
+        value=10,
+        tooltip={
+            'always_visible':True,
+            'placement':'bottom'
+        }
+    ),
+    html.P("y-axis:"),
+    dcc.Dropdown(
+        id='y-axis-box1', 
+        options=dropdownNumericalValues,
+        value='total_playtime'
+    ),
+    dcc.Graph(id="custom-box-plot"),
+
+    html.H2(children='Customizable Scatter Plot'),
 
     html.H5("Datasource:"),
     html.P("sortBy:"),
@@ -150,10 +222,7 @@ app.layout = html.Div(children=[
     ),
     dcc.Dropdown(
         id='data-ascdesc-scatter1', 
-        options = [
-            {'label': 'asc', 'value': 'asc'},
-            {'label': 'desc', 'value': 'desc'}
-        ],
+        options = ascDesc,
         value='desc'
     ),
     html.P("percentage of data:"),
@@ -162,7 +231,7 @@ app.layout = html.Div(children=[
         min=0,
         max=100,
         step=1,
-        value=10,
+        value=1,
         tooltip={
             'always_visible':True,
             'placement':'bottom'
