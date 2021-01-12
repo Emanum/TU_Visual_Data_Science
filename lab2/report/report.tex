@@ -66,14 +66,14 @@ labelformat=brace, position=top}
 I did choose a dataset containing PC games from the popular store Steam. The dataset was created around May 2019 and contains ~27.000 game entries with each one having 18 attributes.
 However, the dataset is not guaranteed to be complete. In addition, it has been already cleaned from unreleased titles and non-games like software. The original data source was the official Steam API and SteamSpy a website which collects all kind of stats from steam.
 
-\subsection{Data preparation}
+%\subsection{Data preparation}
 
-As the field 'platforms','categories' and 'genres' can contain multiple values I split these columns into one column for each different value. Example: platforms has the values windows, linux and mac, after the preparation I now have 3 columns as a bit mask representing if the game supports that platform. Furthermore, 'owners' has a lower and upper bound therefore I also split that into separated columns. As our data contains a column price we add a cloumn type which is either 'Free' or 'Paid' depending on the value of price is 0 or not.
+%As the field 'platforms','categories' and 'genres' can contain multiple values I split these columns into one column for each different value. Example: platforms has the values windows, linux and mac, after the preparation I now have 3 columns as a bit mask representing if the game supports that platform. Furthermore, 'owners' has a lower and upper bound therefore I also split that into separated columns. As our data contains a column price we add a cloumn type which is either 'Free' or 'Paid' depending on the value of price is 0 or not.
 
-TODO: score rating
+%TODO: score rating
 %\bigbreak
-Steam Rating
-https://steamdb.info/blog/steamdb-rating/
+%Steam Rating
+%https://steamdb.info/blog/steamdb-rating/
 
 \section{Insights}
 
@@ -82,53 +82,64 @@ https://steamdb.info/blog/steamdb-rating/
 \subsubsection{What is the interesting fact you found in the data?}
 
 I wanted to compare how the total playtime of all games is split between free-to-play and paid games.\\
-I found out that about ~60 percentage comes from Free to play games while 40 percentage comes from paid games. Furthermore, I also found out that there are 3 big games who generate way more playtime alone vs thousands of games together. 
+I found out that about 60\% percentage comes from free to play games while 40\% comes from paid games. Furthermore, I also found out that there are 3 big games who generate way more playtime alone vs thousands of games together. 
 
 \subsubsection{Give a brief description how you discovered the
 insight.}
 
-First I added a column 'Total Playtime'. Where Total Playtime is \\
-Total Playtime $=$ average playtime $*$ owners lower bound.\\
-However we have to keep in mind that the actual value of the total playtime doesn't have to be correct. Only the relation to the different games should be useful. 
-Then I created different plots and percentage evaluations to discover and explore the data. 
+First I added a column 'Total Playtime'. Where Total Playtime is defined by:
+\smallbreak
+$Total Playtime = average Playtime * owners Lower Bound.$
+\smallbreak
+However, we have to keep in mind that the actual value of the total playtime. 
+Then I created different plots and percentage evaluations to discover the distribution and confirm the found insights. 
 
-\subsubsection{Choose an appropriate visualization to show the insight.}
+Figure \ref{fig:insight1_1} shows a bar chart of all games. We can see that Free games generate a more playtime than paid games.\\ 
 
-Figure \ref{fig:insight1_1} shows a bar chart of all games. We can see that Free games generate a bit more playtime than paid games.\\ 
-\begin{figure}[h]
+\begin{figure*}
     \centering
-    \includegraphics[width=0.5\textwidth]{graphics/insight1_graph1.png}
-    \caption{Bar char of all data.}
-    \label{fig:insight1_1}
-\end{figure}
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=1\textwidth]{graphics/insight1_graph1.png}
+        \caption{Bar char of all data.}
+        \label{fig:insight1_1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=1\textwidth]{graphics/insight1_graph2.png}
+        \caption{Bar chart separated for release year.}
+        \label{fig:insight1_2}
+    \end{subfigure}
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=1\textwidth]{graphics/insight1_graph3.png}
+        \caption{Bar chart for the top 10 played games.}
+        \label{fig:insight1_3}
+    \end{subfigure}
+    \label{fig:insight1}
+    \caption{Exploration of total playtime.}
+\end{figure*}
 
-Figure \ref{fig:insight1_2} shows a bar chart of games separated per release year. This allows us first group our games to see if we can detect some distributions. Interesting is that games released in 2012,2013 and 2017 seems to be very popular. 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\textwidth]{graphics/insight1_graph2.png}
-    \caption{Bar chart separated for release year.}
-    \label{fig:insight1_2}
-\end{figure}
+Figure \ref{fig:insight1_2} shows a bar chart of games separated per release year. This allows us first group our games to see if we can detect some distributions. Interesting is that games released in 2012, 2013 and 2017 seems to be very popular. 
 
 Figure \ref{fig:insight1_3} shows a bar of the top 10 games ranked by total playtime. We can see that Dota2 released  2013, PlayerUnknown's Battlegrounds released 2017 and Counter-Strike: Global Offensive released 2012 have combined way more total playtime than the rest.\\
-This explains the spikes 2012,2012 and 2017 we saw in the last graph.
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\textwidth]{graphics/insight1_graph3.png}
-    \caption{Bar chart for the top 10 played games.}
-    \label{fig:insight1_3}
-\end{figure}
+This explains the spikes 2012, 2013 and 2017 we saw in the last graph.
 
 \subsubsection{How did you test the statistical significance of the insight?}
 
 (i) Hypothesis:\\
 1. Free to play games have more total Playtime than Paid games.\\
-2. The top 3 Games are played way more than all other games together.\\
+2. The top 3 Games are played way more than all other games together.
+
 (ii)Tests:\\
-As I have all the data available I decided to just use the calculated percentages\\
+As I have all the data available I decided to just use the calculated 
+percentages
+
 (iii)Check hypothesis:\\
 Free to Play: 61\% vs. Paid: 39\% So we can assume that the first hypothesis is correct.\\
-Playtime of top 3 games:  60\% rest: 40\% So we can assume that the second hypothesis is correct.\\
+Playtime of top 3 games:  60\% rest: 40\% So we can assume that the second hypothesis is correct.
 
 \subsection{Insight - Rating distribution}
 
@@ -145,28 +156,35 @@ I first created a scatter plot (see Figure \ref{fig:insight2_1}) with all games 
 
 \begin{figure}
     \centering
-    \includegraphics[width=1\textwidth]{graphics/insight2_graph1.png}
-    \caption{Scatter plot for all games with rating and release date}
-    \label{fig:insight2_1}
+    \begin{subfigure}[b]{1\textwidth}
+        \centering
+        \includegraphics[width=1\textwidth]{graphics/insight2_graph1.png}
+        \caption{Scatter plot for all games with rating and release date}
+        \label{fig:insight2_1}
+    \end{subfigure}
+    \vskip\baselineskip
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=1\textwidth]{graphics/insight2_graph2.png}
+        \caption{Bar chart of all released games and the distribution of the top 10\% rated games.}
+        \label{fig:insight2_2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.475\textwidth}
+        \centering
+        \includegraphics[width=1\textwidth]{graphics/insight2_graph3.png}
+        \caption{Trend of released games being part of the top 10\% rated games}
+        \label{fig:insight2_3}
+    \end{subfigure}
+    \label{fig:insight2}
+    \caption{Exploration of the rating distribution.}
 \end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\textwidth]{graphics/insight2_graph2.png}
-    \caption{Bar chart of all released games and the distribution of the top 10\% rated games.}
-    \label{fig:insight2_2}
-\end{figure}
 
-\begin{figure}
-    \centering
-    \includegraphics[width=0.5\textwidth]{graphics/insight2_graph3.png}
-    \caption{Trend of released games being part of the top 10\% rated games}
-    \label{fig:insight2_3}
-\end{figure}
 
 \subsubsection{How did you test the statistical significance of the insight?}
 
-\subsection{Insight - distribution for platforms}
+\subsection{Insight - comparing statistics of filtered subsets}
 
 \subsubsection{What is the interesting fact you found in the data?}
 
@@ -175,41 +193,54 @@ I compared various attributes of all games grouped by supported platform (window
 \subsubsection{Give a brief description how you discovered the
 insight.}
 
-I began to write dynamic filter methods which allow me to filter games with any column also when it has multiple values, for example platform, categories, developer and publisher. 
-
+My basic concept was to write a dynamic script which allows me to quickly filter and compare different subsets of the data. This way I can simply try out various combinations until I find something interesting.\\
+My first step is a script with dynamic filters. In the data there are columns (platform, categories, developer and publisher) with multiple values for each row. So I had to find a way to handle these. An example filter call could look like this:\\
 \begin{minipage}{\linewidth}
 \begin{lstlisting}
-% This gives us the ability to quickly perform filter on the dataset 
-and directly processed them to plots
-multipleFilter(df,[
-    lambda row: orFilter(row,'platforms',['linux','mac']),
-    lambda row: biggerFilter(row,'owners_low_bound',0),
-    lambda row: smallerFilter(row,'price',5),
-    lambda row: orFilter(row,'categories',['Single-player']),
-    lambda row: notFilter(row,'categories',['Multi-player']),
-])
+preFilteredDF = multipleFilter(df,[
+            lambda row: orFilter(row,'platforms',['linux','mac']),
+            lambda row: biggerFilter(row,'owners_low_bound',0),
+            lambda row: smallerFilter(row,'price',5),
+            lambda row: orFilter(row,'categories',['Single-player']),
+            lambda row: notFilter(row,'categories',['Multi-player']),
+        ])
 \end{lstlisting}
 \end{minipage}
 
-Additionally, I wrote a method to calculate the mean/sum/var of multiple pre-filtered dataframes. This allows us to compare it even further with different plots. Example: In the first step we filter for multiplayer games with a price over 30. Then we split these resulting dataset into different groups (for example platforms) and compare the means/sum/var of different columns.\\
+Then I added the ability to split this filtered dataset into multiple subsets by a user defined column and list of combination the user wants to compare. For each subset either the mean, sum or variance is calculated and combined into a single dataframe. This dataframe can then be visualized in different graphs.
+%Additionally, I wrote a method to calculate the mean/sum/var of multiple pre-filtered dataframes. This allows us to compare it even further with different plots. Example: In the first step we filter for multiplayer games with a price over 30. Then we split these resulting dataset into different groups (for example platforms) and compare the means/sum/var of different columns.\\
 
+\begin{minipage}{\linewidth}
+    \begin{lstlisting}
+stats = getStatsDataFrame(
+    preFilteredDF,  # our dataset from the first step
+    'categories',   # the column we want to split the dataset
+    [['Single-player'],['Multi-player']],
+                    # the combinations we want to compare
+    'or',           # how these filter combinations are applied 
+                      (logical and, or, equals )
+    'mean')         # kind of stats to be calculated
+
+ax = stats['total_playtime'].plot(kind='bar', stacked=False)
+ax.set_ylabel('total_playtime')
+ax.set_title("Distribution")
+    \end{lstlisting}
+\end{minipage}
 
 \begin{figure}[h]
     \centering
     \begin{subfigure}[b]{0.45\columnwidth}
         \centering
         \includegraphics[width=\textwidth]{graphics/insight3_graph1.png}
-        \subcaption{}
         \label{fig:insight3_1}
     \end{subfigure}
     \begin{subfigure}[b]{0.45\columnwidth}
         \centering
         \includegraphics[width=\textwidth]{graphics/insight3_graph2.png}
-        \subcaption{}
         \label{fig:insight3_2}
     \end{subfigure}
     
-    \caption{Simple visualizations of graph data structures}
+    \caption{Distribution of games}
     \label{fig:insight3_distro_plat} 
   \end{figure}
 
