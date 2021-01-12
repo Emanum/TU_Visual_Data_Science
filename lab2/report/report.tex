@@ -10,6 +10,10 @@
 \usepackage[titletoc,title]{appendix}
 \usepackage[parfill]{parskip}
 
+\usepackage{subcaption}
+\captionsetup[subfigure]{list=true, font=large, labelfont=bf, 
+labelformat=brace, position=top}
+
 % Math
 % https://www.overleaf.com/learn/latex/Mathematical_expressions
 % https://en.wikibooks.org/wiki/LaTeX/Mathematics
@@ -29,6 +33,7 @@
 % https://en.wikibooks.org/wiki/LaTeX/Algorithms
 \usepackage[ruled,vlined]{algorithm2e}
 \usepackage{algorithmic}
+\usepackage{listings}
 
 % Code syntax highlighting
 % https://www.overleaf.com/learn/latex/Code_Highlighting_with_minted
@@ -70,14 +75,16 @@ TODO: score rating
 Steam Rating
 https://steamdb.info/blog/steamdb-rating/
 
-\section{Insight - generated playtime Free to Play vs Paid games}
+\section{Insights}
 
-\subsection{What is the interesting fact you found in the data?}
+\subsection{Insight - generated playtime Free to Play vs Paid games}
+
+\subsubsection{What is the interesting fact you found in the data?}
 
 I wanted to compare how the total playtime of all games is split between free-to-play and paid games.\\
 I found out that about ~60 percentage comes from Free to play games while 40 percentage comes from paid games. Furthermore, I also found out that there are 3 big games who generate way more playtime alone vs thousands of games together. 
 
-\subsection{Give a brief description how you discovered the
+\subsubsection{Give a brief description how you discovered the
 insight.}
 
 First I added a column 'Total Playtime'. Where Total Playtime is \\
@@ -85,7 +92,7 @@ Total Playtime $=$ average playtime $*$ owners lower bound.\\
 However we have to keep in mind that the actual value of the total playtime doesn't have to be correct. Only the relation to the different games should be useful. 
 Then I created different plots and percentage evaluations to discover and explore the data. 
 
-\subsection{Choose an appropriate visualization to show the insight.}
+\subsubsection{Choose an appropriate visualization to show the insight.}
 
 Figure \ref{fig:insight1_1} shows a bar chart of all games. We can see that Free games generate a bit more playtime than paid games.\\ 
 \begin{figure}[h]
@@ -112,7 +119,7 @@ This explains the spikes 2012,2012 and 2017 we saw in the last graph.
     \label{fig:insight1_3}
 \end{figure}
 
-\subsection{How did you test the statistical significance of the insight?}
+\subsubsection{How did you test the statistical significance of the insight?}
 
 (i) Hypothesis:\\
 1. Free to play games have more total Playtime than Paid games.\\
@@ -123,13 +130,13 @@ As I have all the data available I decided to just use the calculated percentage
 Free to Play: 61\% vs. Paid: 39\% So we can assume that the first hypothesis is correct.\\
 Playtime of top 3 games:  60\% rest: 40\% So we can assume that the second hypothesis is correct.\\
 
-\section{Insight - Rating distribution}
+\subsection{Insight - Rating distribution}
 
-\subsection{What is the interesting fact you found in the data?}
+\subsubsection{What is the interesting fact you found in the data?}
 
 I found out that games with a more recent release date tend to have a lower rating than games with an older release date.\\
 
-\subsection{Give a brief description how you discovered the
+\subsubsection{Give a brief description how you discovered the
 insight.}
 
 As the dataset only includes the count of positive and negative reviews I used the scoring Method from "SteamDB.info" https://steamdb.info/blog/steamdb-rating/ to calculate a score from 0-1. The basic concept is to pull the score stronger towards 0.5 the less total reviews there are. So it should compensate for small  games and make them comparable to large games. 
@@ -157,18 +164,61 @@ I first created a scatter plot (see Figure \ref{fig:insight2_1}) with all games 
     \label{fig:insight2_3}
 \end{figure}
 
-\subsection{How did you test the statistical significance of the insight?}
+\subsubsection{How did you test the statistical significance of the insight?}
 
-\section{Insight - distribution along platforms}
+\subsection{Insight - distribution for platforms}
 
-\subsection{What is the interesting fact you found in the data?}
+\subsubsection{What is the interesting fact you found in the data?}
 
+I compared various attributes of all games grouped by supported platform (windows, linux, mac). 
 
-\subsection{Give a brief description how you discovered the
+\subsubsection{Give a brief description how you discovered the
 insight.}
 
-\subsection{Choose an appropriate visualization to show the insight.}
+I began to write dynamic filter methods which allow me to filter games with any column also when it has multiple values, for example platform, categories, developer and publisher. 
 
-\subsection{How did you test the statistical significance of the insight?}
+\begin{minipage}{\linewidth}
+\begin{lstlisting}
+% This gives us the ability to quickly perform filter on the dataset 
+and directly processed them to plots
+multipleFilter(df,[
+    lambda row: orFilter(row,'platforms',['linux','mac']),
+    lambda row: biggerFilter(row,'owners_low_bound',0),
+    lambda row: smallerFilter(row,'price',5),
+    lambda row: orFilter(row,'categories',['Single-player']),
+    lambda row: notFilter(row,'categories',['Multi-player']),
+])
+\end{lstlisting}
+\end{minipage}
+
+Additionally, I wrote a method to calculate the mean/sum/var of multiple pre-filtered dataframes. This allows us to compare it even further with different plots. Example: In the first step we filter for multiplayer games with a price over 30. Then we split these resulting dataset into different groups (for example platforms) and compare the means/sum/var of different columns.\\
+
+
+\begin{figure}[h]
+    \centering
+    \begin{subfigure}[b]{0.45\columnwidth}
+        \centering
+        \includegraphics[width=\textwidth]{graphics/insight3_graph1.png}
+        \subcaption{}
+        \label{fig:insight3_1}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.45\columnwidth}
+        \centering
+        \includegraphics[width=\textwidth]{graphics/insight3_graph2.png}
+        \subcaption{}
+        \label{fig:insight3_2}
+    \end{subfigure}
+    
+    \caption{Simple visualizations of graph data structures}
+    \label{fig:insight3_distro_plat} 
+  \end{figure}
+
+\subsubsection{How did you test the statistical significance of the insight?}
+
+\section{Comparison exploration vs. confirmation}
+
+As I had never done any data exploration before and had to get familiar with the tools, my processes was the following: I began with preparing the data and calculating additional columns based on my knowledge and assumptions of the dataset. Furthermore, I generated a lot of bar chart distributions with different Filter to get a better understanding of the data and what columns and games are different from other and maybe ruin my plots as we saw the top 3 games are not really comparable to the rest.
+Then I decided to analyze different combinations with the scatter plot in the dashboard where I found a possible correlation between release date and rating. My process of statistical confirmation was mainly to compare absolute numbers of sums, means, percentage of games fulfilling certain conditions. In my opinion this is correct as I have all the data available anyway.\\
+However not all insights turned out to be true when considering multiple graphs and values. 
 
 \end{document}
