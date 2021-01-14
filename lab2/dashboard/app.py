@@ -278,7 +278,7 @@ explorationTab = dbc.Card(
     className="mt-3",
 )
 
-dashboardComp = DashboardCompoment(df)
+dashboardComp = DashboardCompoment(df,app)
 dashboard = dashboardComp.getTab()
 
 app.layout = dbc.Container([
