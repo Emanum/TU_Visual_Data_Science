@@ -28,7 +28,9 @@ dropdownLabelValues = [
     {'label': 'SteamSpy-TopTag', 'value': 'top_tag'},
     {'label': 'publisher', 'value': 'publisher'},
     {'label': 'developer', 'value': 'developer'},
-    {'label': 'name', 'value': 'name'}
+    {'label': 'name', 'value': 'name'},
+    {'label': 'release_year', 'value': 'release_year'},
+    {'label': 'release_date', 'value': 'release_date'},
 ]
 
 ascDesc = [
@@ -42,7 +44,7 @@ infoColumns = [
     'publisher',
     'platforms',
     'required_age',
-    'categories',
+    #'categories',row is too long
     'genres',
     'steamspy_tags',
     'achievements',
@@ -70,6 +72,9 @@ class DashboardCompoment:
                 [
                     html.Div(children=self.getFilterHTML()),
                     html.Div(children=self.getScatterHTML()),
+                    html.Div(children=self.getBoxHTML()),
+                    html.Div(children=self.getBarHTML()),
+
                 ]
             ),
             className="mt-3",
@@ -162,8 +167,11 @@ class DashboardCompoment:
                     ),
                 ]),
                 dcc.Graph(id="dashboard-scatter"),
-
-                html.H3("Box Plot"),
+            ]
+    
+    def getBoxHTML(self):
+        return [
+            html.H3("Box Plot"),
                 dbc.Row([
                     html.P("y-axis:"),
                     dbc.Col(
@@ -175,7 +183,39 @@ class DashboardCompoment:
                     )
                 ]),
                 dcc.Graph(id="dashboard-box"),
-            ]
+        ]
+    
+    def getBarHTML(self):
+        return [
+            html.H3("Bar Chart"),
+                dbc.Row([
+                    html.P("x-axis:"),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id='x-axis-bardashboard', 
+                            options=dropdownLabelValues,
+                            value='top_tag'
+                        )
+                    ),
+                    html.P("y-axis:"),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id='y-axis-bardashboard', 
+                            options=dropdownNumericalValues,
+                            value='owners_low_bound'
+                        )
+                    ),
+                    html.P("color:"),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id='color-bardashboard', 
+                            options=dropdownLabelValues,
+                            value='release_year'
+                        ), 
+                    ),
+                ]),
+                dcc.Graph(id="dashboard-bar"),
+        ]
     
     def initCallbacks(self):
         self.app.callback(
@@ -197,6 +237,12 @@ class DashboardCompoment:
             Output("dashboard-box", "figure"),
             Input('signal', 'children'), 
             Input("y-axis-boxdashboard", "value"))(self.createBox)
+        self.app.callback(
+            Output("dashboard-bar", "figure"),
+            Input('signal', 'children'), 
+            Input("x-axis-bardashboard", "value"),
+            Input("y-axis-bardashboard", "value"),
+            Input("color-bardashboard", "value"))(self.createBar)
 
     def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,dataPercent,textBox):
         self.global_dashboard_df = sortAndLimit(self.pDF,dataSortBy,dataAscDesc,dataPercent)
@@ -218,3 +264,7 @@ class DashboardCompoment:
     def createBox(self,signal,y):
         df = self.global_dashboard_df
         return px.box(df,y=y,hover_name="name", hover_data=infoColumns)
+
+    def createBar(self,signal,x,y,col):
+        df = self.global_dashboard_df
+        return px.bar(df, x=x, y=y,color=col,hover_name="name", hover_data=infoColumns,)
