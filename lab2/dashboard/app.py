@@ -1,5 +1,6 @@
 import dash
 import dash_core_components as dcc
+import dash_bootstrap_components as dbc
 import dash_html_components as html
 from dash.dependencies import Input, Output
 import plotly.express as px
@@ -11,20 +12,12 @@ import numpy as np
 from prepareData import *
 from barchart import *
 from scatterChart import *
+from filterData import * 
+from dynDashComponent import *  
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
-# assume you have a "long-form" data frame
-# see https://plotly.com/python/px-arguments/ for more options
-df_example = pd.DataFrame({
-    "Fruit": ["Apples", "Oranges", "Bananas", "Apples", "Oranges", "Bananas"],
-    "Amount": [4, 1, 2, 2, 4, 5],
-    "City": ["SF", "SF", "SF", "Montreal", "Montreal", "Montreal"]
-})
-
-fig_example = px.bar(df_example, x="Fruit", y="Amount", color="City", barmode="group")
+app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # INIT
 df = pd.read_csv(filepath_or_buffer = '/Users/Manuel 1/Desktop/TU_Visual_Data_Science/lab2/dashboard/data/steam.csv',sep=',', decimal = ".")
@@ -47,6 +40,8 @@ dropdownNumericalValues = [
     {'label': 'total_playtime', 'value': 'total_playtime'},
     {'label': 'estimated_revenue', 'value': 'estimated_revenue'}
 ]
+
+statsColumns = ['release_date','required_age','achievements','average_playtime','price','owners_low_bound','rating','total_playtime','estimated_revenue']
 
 dropdownLabelValues = [
     {'label': 'FreeToPlay-Paid', 'value': 'type'},
@@ -114,7 +109,7 @@ def filterData(df,dataSortBy,dataAscDesc,dataPercent):
      Input("data-percentage-scatter1", "value"),
      ])
 def generate_scatter1(x, y,siz,col,config,dataSortBy,dataAscDesc,dataPercent):
-    dataProc = filterData(df,dataSortBy,dataAscDesc,dataPercent)
+    dataProc = sortAndLimit(df,dataSortBy,dataAscDesc,dataPercent)
     if('color' in config and 'size' in config):
         fig = px.scatter(dataProc, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
     elif('color' in config):
@@ -134,146 +129,173 @@ def generate_scatter1(x, y,siz,col,config,dataSortBy,dataAscDesc,dataPercent):
      Input("data-percentage-box1", "value")
      ])
 def generate_box1(y,dataSortBy,dataAscDesc,dataPercent):
-    dataProc = filterData(df,dataSortBy,dataAscDesc,dataPercent)
+    dataProc = sortAndLimit(df,dataSortBy,dataAscDesc,dataPercent)
     return px.box(dataProc,y=y,hover_name="name", hover_data=infoColumns)
 
-app.layout = html.Div(children=[
+presentationTab = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H2(children='Total Playtime'),
+
+            html.H4(children='Total Playtime = average_playtime * owners_lower_bound'),
+
+            dcc.Graph(
+                id='barChart-all',
+                figure=barFig
+            ),
+
+            html.H2(children='Total Playtime per Release Year'),
+
+            dcc.Graph(
+                id='barChart-perYear',
+                figure=barFig2
+            ),
+
+            html.H2(children='Total Playtime per Release Year top 50 Games'),
+
+            dcc.Graph(
+                id='barChart-perYearAndName',
+                figure=barFig3
+            ),
+
+            html.H2(children='Total Playtime top 50 Games'),
+
+            dcc.Graph(
+                id='barChart-allTop50',
+                figure=barFig4
+            ),
+
+            html.H3(children='Distribution Total Playtime'),
+                dcc.Graph(
+                id='box-1',
+                figure=boxplot1
+            ),
+        ]
+    ),
+    className="mt-3",
+)
+
+explorationTab = dbc.Card(
+    dbc.CardBody(
+        [
+            html.H2(children='Customizable Box Plot'),
+
+            html.H5("Datasource:"),
+            html.P("sortBy:"),
+            dcc.Dropdown(
+                id='data-sortBy-box1', 
+                options=dropdownNumericalValues,
+                value='total_playtime'
+            ),
+            dcc.Dropdown(
+                id='data-ascdesc-box1', 
+                options = ascDesc,
+                value='desc'
+            ),
+            html.P("percentage of data:"),
+            dcc.Slider(
+                id='data-percentage-box1',
+                min=0,
+                max=100,
+                step=1,
+                value=10,
+                tooltip={
+                    'always_visible':True,
+                    'placement':'bottom'
+                }
+            ),
+            html.P("y-axis:"),
+            dcc.Dropdown(
+                id='y-axis-box1', 
+                options=dropdownNumericalValues,
+                value='total_playtime'
+            ),
+            dcc.Graph(id="custom-box-plot"),
+
+            html.H2(children='Customizable Scatter Plot'),
+
+            html.H5("Datasource:"),
+            html.P("sortBy:"),
+            dcc.Dropdown(
+                id='data-sortBy-scatter1', 
+                options=dropdownNumericalValues,
+                value='total_playtime'
+            ),
+            dcc.Dropdown(
+                id='data-ascdesc-scatter1', 
+                options = ascDesc,
+                value='desc'
+            ),
+            html.P("percentage of data:"),
+            dcc.Slider(
+                id='data-percentage-scatter1',
+                min=0,
+                max=100,
+                step=1,
+                value=1,
+                tooltip={
+                    'always_visible':True,
+                    'placement':'bottom'
+                }
+            ),
+            html.P("x-axis:"),
+            dcc.Dropdown(
+                id='x-axis-scatter1', 
+                options=dropdownNumericalValues,
+                value='total_playtime'
+            ),
+            html.P("y-axis:"),
+            dcc.Dropdown(
+                id='y-axis-scatter1', 
+                options=dropdownNumericalValues,
+                value='total_playtime'
+            ),
+            html.P("Config:"),
+            dcc.Checklist(
+                id='config-scatter1', 
+                options=[
+                    {'label': 'enable color', 'value': 'color'},
+                    {'label': 'enable size', 'value': 'size'}
+                ],
+                value=[],
+                labelStyle={'display': 'inline-block'}
+            ),
+            html.P("color:"),
+            dcc.Dropdown(
+                id='color-scatter1', 
+                options=dropdownLabelValues,
+                value='type'
+            ),
+            html.P("size:"),
+            dcc.Dropdown(
+                id='size-scatter1', 
+                options=dropdownNumericalValues,
+                value='price'
+            ),
+            dcc.Graph(id="scatter-plot-1"),
+        ]
+    ),
+    className="mt-3",
+)
+
+dashboardComp = DashboardCompoment(df)
+dashboard = dashboardComp.getTab()
+
+app.layout = dbc.Container([
     html.H1(children='Steam Game Data'),
 
-    html.H2(children='Total Playtime'),
-
-    html.H4(children='Total Playtime = average_playtime * owners_lower_bound'),
-
-    dcc.Graph(
-        id='barChart-all',
-        figure=barFig
-    ),
-
-    html.H2(children='Total Playtime per Release Year'),
-
-    dcc.Graph(
-        id='barChart-perYear',
-        figure=barFig2
-    ),
-
-    html.H2(children='Total Playtime per Release Year top 50 Games'),
-
-    dcc.Graph(
-        id='barChart-perYearAndName',
-        figure=barFig3
-    ),
-
-    html.H2(children='Total Playtime top 50 Games'),
-
-    dcc.Graph(
-        id='barChart-allTop50',
-        figure=barFig4
-    ),
-
-    html.H3(children='Distribution Total Playtime'),
-        dcc.Graph(
-        id='box-1',
-        figure=boxplot1
-    ),
-
-
-    html.H2(children='Customizable Box Plot'),
-
-    html.H5("Datasource:"),
-    html.P("sortBy:"),
-    dcc.Dropdown(
-        id='data-sortBy-box1', 
-        options=dropdownNumericalValues,
-        value='total_playtime'
-    ),
-    dcc.Dropdown(
-        id='data-ascdesc-box1', 
-        options = ascDesc,
-        value='desc'
-    ),
-    html.P("percentage of data:"),
-    dcc.Slider(
-        id='data-percentage-box1',
-        min=0,
-        max=100,
-        step=1,
-        value=10,
-        tooltip={
-            'always_visible':True,
-            'placement':'bottom'
-        }
-    ),
-    html.P("y-axis:"),
-    dcc.Dropdown(
-        id='y-axis-box1', 
-        options=dropdownNumericalValues,
-        value='total_playtime'
-    ),
-    dcc.Graph(id="custom-box-plot"),
-
-    html.H2(children='Customizable Scatter Plot'),
-
-    html.H5("Datasource:"),
-    html.P("sortBy:"),
-    dcc.Dropdown(
-        id='data-sortBy-scatter1', 
-        options=dropdownNumericalValues,
-        value='total_playtime'
-    ),
-    dcc.Dropdown(
-        id='data-ascdesc-scatter1', 
-        options = ascDesc,
-        value='desc'
-    ),
-    html.P("percentage of data:"),
-    dcc.Slider(
-        id='data-percentage-scatter1',
-        min=0,
-        max=100,
-        step=1,
-        value=1,
-        tooltip={
-            'always_visible':True,
-            'placement':'bottom'
-        }
-    ),
-    html.P("x-axis:"),
-    dcc.Dropdown(
-        id='x-axis-scatter1', 
-        options=dropdownNumericalValues,
-        value='total_playtime'
-    ),
-    html.P("y-axis:"),
-    dcc.Dropdown(
-        id='y-axis-scatter1', 
-        options=dropdownNumericalValues,
-        value='total_playtime'
-    ),
-    html.P("Config:"),
-    dcc.Checklist(
-        id='config-scatter1', 
-        options=[
-            {'label': 'enable color', 'value': 'color'},
-            {'label': 'enable size', 'value': 'size'}
-        ],
-        value=[],
-        labelStyle={'display': 'inline-block'}
-    ),
-    html.P("color:"),
-    dcc.Dropdown(
-        id='color-scatter1', 
-        options=dropdownLabelValues,
-        value='type'
-    ),
-    html.P("size:"),
-    dcc.Dropdown(
-        id='size-scatter1', 
-        options=dropdownNumericalValues,
-        value='price'
-    ),
-    dcc.Graph(id="scatter-plot-1"),
+    dbc.Tabs(
+        [
+            dbc.Tab(dashboard, label="Dashboard"),
+            dbc.Tab(presentationTab, label="Presentation"),
+            dbc.Tab(explorationTab, label="Exploration"),
+        ]
+    )
 
 ])
+
+
+
 
 if __name__ == '__main__':
     app.run_server(debug=True)

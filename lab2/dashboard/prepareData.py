@@ -8,6 +8,22 @@ def get_unique(series):
     """Get unique values from a Pandas series containing semi-colon delimited strings."""
     return set(list(itertools.chain(*series.apply(lambda x: [c for c in x.split(';')]))))
 
+def get_unique_list(series):
+    return set(list(itertools.chain(*series.apply(lambda x: [c for c in x]))))
+
+def processPlattform(df):
+    plat_cols = get_unique(df['platforms'])
+    
+    # create a new column for each platform, with 1s indicating membership and 0s for non-members
+    for col in sorted(plat_cols):
+        plat_name = re.sub(r'[\s\-\/]', '_', col.lower())
+        plat_name = re.sub(r'[()]', '', plat_name)
+        
+        df[plat_name] = df['platforms'].apply(lambda x: 1 if col in x.split(';') else 0)
+
+def handleMultipleItemColumn(df,column,sep):
+    df[column] = df[column].apply(lambda x: x.split(sep))
+
 def process_cat_gen_tag(df):
     """Process categories, genres, steamspy_tags and platform columns."""
     # get all unique plattform names
@@ -69,10 +85,6 @@ def calc_rating(row):
 
     return score * 100
 
-def handleMultipleItemColumn(df,column,sep):
-    df[column] = df[column].apply(lambda x: x.split(sep))
-
-
 def pre_process(df):
     """Preprocess Steam dataset for exploratory analysis."""
     #df = pd.read_csv(filepath_or_buffer = 'datasets/steam/steam.csv',sep=',', decimal = ".")
@@ -93,12 +105,14 @@ def pre_process(df):
     
     # process genres, categories and steamspy_tag columns
     #df = process_cat_gen_tag(df)
+    processPlattform(df)
     handleMultipleItemColumn(df,'platforms',';')
     handleMultipleItemColumn(df,'categories',';')
     df['top_tag'] = df['steamspy_tags'].apply(lambda x: x.split(';')[0])
     handleMultipleItemColumn(df,'steamspy_tags',';')
     handleMultipleItemColumn(df,'developer',';')
     handleMultipleItemColumn(df,'publisher',';')
+    handleMultipleItemColumn(df,'genres',';')
     
     # Create a column to split free vs paid games
     df['type'] = 'Free'
