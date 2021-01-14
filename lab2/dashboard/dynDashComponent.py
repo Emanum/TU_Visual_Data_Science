@@ -38,6 +38,11 @@ ascDesc = [
     {'label': 'desc', 'value': 'desc'}
 ]
 
+sortType = [
+    {'label': '%', 'value': '%'},
+    {'label': 'count', 'value': 'count'}
+]
+
 infoColumns = [
     'release_date',
     'developer',
@@ -72,8 +77,8 @@ class DashboardCompoment:
                 [
                     html.Div(children=self.getFilterHTML()),
                     html.Div(children=self.getScatterHTML()),
-                    html.Div(children=self.getBoxHTML()),
                     html.Div(children=self.getBarHTML()),
+                    html.Div(children=self.getBoxHTML()),
 
                 ]
             ),
@@ -105,7 +110,12 @@ class DashboardCompoment:
                     options = ascDesc,
                     value='desc'
                 )),
-                html.P("percentage of data:"),
+                dbc.Col(dcc.Dropdown(
+                    id='dashboard-sortByType', 
+                    options = sortType,
+                    value='%'
+                )),
+                html.P("n of data:"),
                 dbc.Col(dcc.Slider(
                     id='dashboard-filter-percent',min=0, max=100,step=1,value=1,tooltip={'always_visible':True,'placement':'bottom'}
                 )),
@@ -223,6 +233,7 @@ class DashboardCompoment:
             Input('update-filter','n_clicks'),
             State('dashboard-sortBy-Column', 'value'),
             State('dashboard-sortByASC', 'value'),
+            State('dashboard-sortByType', 'value'),
             State('dashboard-filter-percent', 'value'),
             State('dashboard-filter-textfield', 'value'))(self.updateFilteredData)
         self.app.callback(
@@ -244,8 +255,8 @@ class DashboardCompoment:
             Input("y-axis-bardashboard", "value"),
             Input("color-bardashboard", "value"))(self.createBar)
 
-    def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,dataPercent,textBox):
-        self.global_dashboard_df = sortAndLimit(self.pDF,dataSortBy,dataAscDesc,dataPercent)
+    def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,sortByType,dataPercent,textBox):
+        self.global_dashboard_df = sortAndLimit2(self.pDF,dataSortBy,dataAscDesc,dataPercent,sortByType)
         return n_clicks
 
     def createScatter(self,signal,x, y,col,siz,config):
@@ -258,13 +269,17 @@ class DashboardCompoment:
             fig = px.scatter(df, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
         else:
             fig = px.scatter(df, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="ols")
-        fig.update_layout(autosize=True)
+        fig.update_layout(autosize=True,height=800)
         return fig
     
     def createBox(self,signal,y):
         df = self.global_dashboard_df
-        return px.box(df,y=y,hover_name="name", hover_data=infoColumns)
+        fig = px.box(df,y=y,hover_name="name", hover_data=infoColumns)
+        fig.update_layout(autosize=True,height=500)
+        return fig
 
     def createBar(self,signal,x,y,col):
         df = self.global_dashboard_df
-        return px.bar(df, x=x, y=y,color=col,hover_name="name", hover_data=infoColumns,)
+        fig = px.bar(df, x=x, y=y,color=col,hover_name="name", hover_data=infoColumns,)
+        fig.update_layout(autosize=True,height=750)
+        return fig

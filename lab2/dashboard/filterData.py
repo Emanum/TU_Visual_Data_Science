@@ -37,6 +37,14 @@ def sortAndLimit(df,dataSortBy,dataAscDesc,dataPercent):
     rowNr = int(len(df)*(dataPercent/100))
     return df.sort_values(by=dataSortBy,ascending=asc).head(rowNr)
 
+def sortAndLimit2(df,dataSortBy,dataAscDesc,data,type):
+    asc = dataAscDesc == 'asc'
+    if(type == "%"):
+        rowNr = int(len(df)*(data/100))
+    else:
+         rowNr = data
+    return df.sort_values(by=dataSortBy,ascending=asc).head(rowNr)
+
 ############################
 
 def getAllCombinations(stuff):
