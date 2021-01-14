@@ -117,7 +117,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='x-axis-scatterdashboard', 
                             options=dropdownNumericalValues,
-                            value='total_playtime'
+                            value='release_date'
                         )
                     ),
                     html.P("y-axis:"),
@@ -125,7 +125,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='y-axis-scatterdashboard', 
                             options=dropdownNumericalValues,
-                            value='total_playtime'
+                            value='rating'
                         )
                     ),
                 ]),
@@ -162,6 +162,19 @@ class DashboardCompoment:
                     ),
                 ]),
                 dcc.Graph(id="dashboard-scatter"),
+
+                html.H3("Box Plot"),
+                dbc.Row([
+                    html.P("y-axis:"),
+                    dbc.Col(
+                        dcc.Dropdown(
+                            id='y-axis-boxdashboard', 
+                            options=dropdownNumericalValues,
+                            value='rating'
+                        )
+                    )
+                ]),
+                dcc.Graph(id="dashboard-box"),
             ]
     
     def initCallbacks(self):
@@ -180,6 +193,10 @@ class DashboardCompoment:
             Input("color-scatterdashboard", "value"),
             Input("size-scatterdashboard", "value"),
             Input("config-scatterdashboard", "value"))(self.createScatter)
+        self.app.callback(
+            Output("dashboard-box", "figure"),
+            Input('signal', 'children'), 
+            Input("y-axis-boxdashboard", "value"))(self.createBox)
 
     def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,dataPercent,textBox):
         self.global_dashboard_df = sortAndLimit(self.pDF,dataSortBy,dataAscDesc,dataPercent)
@@ -197,3 +214,7 @@ class DashboardCompoment:
             fig = px.scatter(df, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="ols")
         fig.update_layout(autosize=True)
         return fig
+    
+    def createBox(self,signal,y):
+        df = self.global_dashboard_df
+        return px.box(df,y=y,hover_name="name", hover_data=infoColumns)
