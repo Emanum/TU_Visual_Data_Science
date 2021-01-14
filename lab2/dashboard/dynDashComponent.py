@@ -1,7 +1,7 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from filterData import * 
@@ -60,7 +60,9 @@ class DashboardCompoment:
 
     def __init__(self,df,app): 
         self.pDF = df
+        self.global_dashboard_df = df
         self.app = app
+        self.initCallbacks()
 
     def getTab(self):
         return dbc.Card(
@@ -163,26 +165,28 @@ class DashboardCompoment:
             ]
     
     def initCallbacks(self):
-        self.app.callback(dash.dependencies.Output('filteredDataset', 'children'),
-            [
-                dash.dependencies.Input('dashboard-sortBy-Column', 'value'),
-                dash.dependencies.Input('dashboard-sortByASC', 'value'),
-                dash.dependencies.Input('dashboard-filter-percent', 'value'),
-                dash.dependencies.Input('update-filter', 'value')
-            ])(self.updateFilteredData)
-        self.app.callback(dash.dependencies.Output('dashboard-scatter', 'figure'),
-            [
-                dash.dependencies.Input('filteredDataset', 'children'),
-                dash.dependencies.Input('x-axis-scatterdashboard', 'value'),
-                dash.dependencies.Input('y-axis-scatterdashboard', 'value'),
-                dash.dependencies.Input('color-scatterdashboard', 'value'),
-                dash.dependencies.Input('size-scatterdashboard', 'value'),
-            ])(self.createScatter)
+        self.app.callback(
+            Output('signal', 'children'),
+            Input('update-filter','n_clicks'),
+            State('dashboard-sortBy-Column', 'value'),
+            State('dashboard-sortByASC', 'value'),
+            State('dashboard-filter-percent', 'value'),
+            State('dashboard-filter-textfield', 'value'))(self.updateFilteredData)
+        self.app.callback(
+            Output("dashboard-scatter", "figure"),
+            Input('signal', 'children'),
+            Input("x-axis-scatterdashboard", "value"), 
+            Input("y-axis-scatterdashboard", "value"),
+            Input("color-scatterdashboard", "value"),
+            Input("size-scatterdashboard", "value"),
+            Input("config-scatterdashboard", "value"))(self.createScatter)
 
-    def updateFilteredData(self,sortBy,dataSortBy,dataAscDesc,dataPercent,n_clicks):
-         return sortAndLimit(self.pDF,dataSortBy,dataAscDesc,dataPercent)
+    def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,dataPercent,textBox):
+        self.global_dashboard_df = sortAndLimit(self.pDF,dataSortBy,dataAscDesc,dataPercent)
+        return n_clicks
 
-    def createScatter(self,df,x, y,siz,col,config):
+    def createScatter(self,signal,x, y,col,siz,config):
+        df = self.global_dashboard_df
         if('color' in config and 'size' in config):
             fig = px.scatter(df, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
         elif('color' in config):
@@ -191,5 +195,5 @@ class DashboardCompoment:
             fig = px.scatter(df, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
         else:
             fig = px.scatter(df, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="ols")
-        fig.update_layout(autosize=True, height=1250)
+        fig.update_layout(autosize=True)
         return fig

@@ -2,7 +2,7 @@ import dash
 import dash_core_components as dcc
 import dash_bootstrap_components as dbc
 import dash_html_components as html
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 import plotly.express as px
 import pandas as pd
 import itertools
@@ -131,6 +131,19 @@ def generate_scatter1(x, y,siz,col,config,dataSortBy,dataAscDesc,dataPercent):
 def generate_box1(y,dataSortBy,dataAscDesc,dataPercent):
     dataProc = sortAndLimit(df,dataSortBy,dataAscDesc,dataPercent)
     return px.box(dataProc,y=y,hover_name="name", hover_data=infoColumns)
+
+
+# ----- INIT CACHE -----
+#TODO use cache
+
+#global_dashboard_df = pDF
+
+# -------- INIT DASHBOARD -------
+
+dashboardComp = DashboardCompoment(df,app)
+dashboard = dashboardComp.getTab()
+
+# --------   LAYOUT  ------------
 
 presentationTab = dbc.Card(
     dbc.CardBody(
@@ -278,19 +291,19 @@ explorationTab = dbc.Card(
     className="mt-3",
 )
 
-dashboardComp = DashboardCompoment(df,app)
-dashboard = dashboardComp.getTab()
+
 
 app.layout = dbc.Container([
     html.H1(children='Steam Game Data'),
-
     dbc.Tabs(
         [
             dbc.Tab(dashboard, label="Dashboard"),
             dbc.Tab(presentationTab, label="Presentation"),
             dbc.Tab(explorationTab, label="Exploration"),
         ]
-    )
+    ),
+
+    html.Div(id='signal', style={'display': 'none'})
 
 ])
 
