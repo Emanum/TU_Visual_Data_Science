@@ -153,7 +153,7 @@ def parseFilterTextField(text):
             elif (filterType == 'same'):
                 erg.append(lambda r,column=column,filterItems=filterItems: sameFilter(r,column,convertToNumber(filterItems)))
             elif (filterType == 'notSame'):
-                erg.append(lambda r,column=column,filterItems=filterItems: notFilter(r,column,convertToNumber(filterItems)))
+                erg.append(lambda r,column=column,filterItems=filterItems: notSameFilter(r,column,convertToNumber(filterItems)))
         
         return erg
     except:
@@ -167,6 +167,8 @@ def convertToList(str):
 
 def convertToNumber(str):
     try:
+        if(str[0] == "'" and str[-0] == "'"):
+            return str[1:-1]
         if("." in str):
             return float(str)
         else:

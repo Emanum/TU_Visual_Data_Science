@@ -118,6 +118,12 @@ filterTypes:
 Examples:
 or;'platforms';[linux,mac]
 or;'categories';[Single-player]
+or;'developer';[Valve]
+
+ignore top3 games:
+notSame;'appid';570
+notSame;'appid';578080
+notSame;'appid';730
 '''
 
 explainColumns = '''
@@ -322,7 +328,12 @@ class DashboardCompoment:
     
     def getTableHTML(self):
          return [
-            html.H3("first 25 Entries"),
+            dbc.Row([
+                dbc.Col(html.H3("first 25 Entries")),
+                dbc.Col(html.P("total:")),
+                dbc.Col(html.P(id = "dashboard-rowCount",children=["init"])),
+
+            ]),
             dash_table.DataTable(
                 id='dashboard-table',
                 #fixed_columns={ 'headers': True, 'data': 1 },
@@ -335,6 +346,7 @@ class DashboardCompoment:
     def initCallbacks(self):
         self.app.callback(
             Output('signal', 'children'),
+            Output('dashboard-rowCount', 'children'),
             Input('update-filter','n_clicks'),
             State('dashboard-sortBy-Column', 'value'),
             State('dashboard-sortByASC', 'value'),
@@ -369,7 +381,7 @@ class DashboardCompoment:
         lambdaArr = parseFilterTextField(textBox)
         #print("after lambdaArr parseFilterTextField")
         self.global_dashboard_df = multipleFilter(self.global_dashboard_df,lambdaArr)
-        return n_clicks
+        return n_clicks,str(self.global_dashboard_df.shape[0])
 
     def createTable(self,signal):
         return self.global_dashboard_df.head(25).to_dict('records')
