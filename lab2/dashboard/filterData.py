@@ -34,6 +34,7 @@ def notSameFilter(row,column,values):
 
 def multipleFilter(df, funcArr):
     erg = df
+    #print(str(funcArr))
     for func in funcArr:
         erg = erg[erg.apply(lambda row: func(row), axis=1)]
     return erg
@@ -102,7 +103,7 @@ def getStatsDataFrame(df,columnname,combinations,filterType,ergType,statsColumns
 
 '''
 Query Syntax: 
-    1) one Query per
+    1) one Query per row
     2) CSV formated, 3 Columns,  seperator=";", quotechar="'"
         filterType;Column;[item1,item2,...]
 filterTypes:
@@ -110,7 +111,8 @@ filterTypes:
         and => all items must be in the game
         or => one of the item must be in the game
         not => none of the items must be in the game
-        equals => excat these items items must be in the game (order does not matter)
+        equals => excat these items items must be in the game 
+                  (order does not matter)
     for single Value columns:
         smaller => game must be smaller than item
         bigger => game must be bigger than item#
@@ -123,30 +125,35 @@ or;'categories';[Single-player]
 return list of lambda
 '''
 def parseFilterTextField(text):
+    #('parseFilterTextField')
     try:
         csvResource = StringIO(text)
         filterDF = pd.read_csv(csvResource, sep=";",quotechar="'",header=None,names=['filterType','column','filterItems'])
         #handleMultipleItemColumn2(filterDF,'filterItems',',')
         erg = []
-        for index, row in filterDF.iterrows():
-            if(row['filterType'] == 'or'):
-                erg.append(lambda x1: orFilter(x1,row['column'],convertToList(row['filterItems'])))
-            elif (row['filterType'] == 'and'):
-                erg.append(lambda x2: andFilter(x2,row['column'],convertToList(row['filterItems'])))
-            elif (row['filterType'] == 'not'):
-                erg.append(lambda x3: notFilter(x3,row['column'],convertToList(row['filterItems'])))
-            elif (row['filterType'] == 'equals'):
-                erg.append(lambda x4: equalsFilter(x4,row['column'],convertToList(row['filterItems'])))
+        for index, dfrow in filterDF.iterrows():
+            filterType = dfrow['filterType']
+            column = dfrow['column']
+            filterItems = dfrow['filterItems']
+            #print(filterType+" " + column + " " +str(filterItems))
+            if(filterType == 'or'):
+                erg.append(lambda r,column=column,filterItems=filterItems: orFilter(r,column,convertToList(filterItems)))
+            elif (filterType == 'and'):
+                erg.append(lambda r,column=column,filterItems=filterItems: andFilter(r,column,convertToList(filterItems)))
+            elif (filterType == 'not'):
+                erg.append(lambda r,column=column,filterItems=filterItems: notFilter(r,column,convertToList(filterItems)))
+            elif (filterType == 'equals'):
+                erg.append(lambda r,column=column,filterItems=filterItems: equalsFilter(r,column,convertToList(filterItems)))
 
-            elif (row['filterType'] == 'smaller'):
-                erg.append(lambda x5: smallerFilter(x5,row['column'],convertToNumber(row['filterItems'])))
-            elif (row['filterType'] == 'bigger'):
-                erg.append(lambda x6: biggerFilter(x6,row['column'],convertToNumber(row['filterItems'])))
+            elif (filterType == 'smaller'):
+                erg.append(lambda r,column=column,filterItems=filterItems: smallerFilter(r,column,convertToNumber(filterItems)))
+            elif (filterType == 'bigger'):
+                erg.append(lambda r,column=column,filterItems=filterItems: biggerFilter(r,column,convertToNumber(filterItems)))
 
-            elif (row['filterType'] == 'same'):
-                erg.append(lambda x7: sameFilter(x7,row['column'],convertToNumber(row['filterItems'])))
-            elif (row['filterType'] == 'notSame'):
-                erg.append(lambda x8: notFilter(x8,row['column'],convertToNumber(row['filterItems'])))
+            elif (filterType == 'same'):
+                erg.append(lambda r,column=column,filterItems=filterItems: sameFilter(r,column,convertToNumber(filterItems)))
+            elif (filterType == 'notSame'):
+                erg.append(lambda r,column=column,filterItems=filterItems: notFilter(r,column,convertToNumber(filterItems)))
         
         return erg
     except:

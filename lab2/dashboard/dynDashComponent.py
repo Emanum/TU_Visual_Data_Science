@@ -1,10 +1,13 @@
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
+import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
 from filterData import * 
+
+import inspect
 
 dropdownNumericalValues = [
     {'label': 'price', 'value': 'price'},
@@ -63,9 +66,41 @@ infoColumns = [
     'price'
  ]
 
+dashTableColumns = [
+    'name',
+    'appid',
+    'release_date',
+    'release_year',
+    #'english',
+    'developer',
+    'publisher',
+    'platforms',
+    'required_age',
+    'categories',
+    'genres',
+    'steamspy_tags',
+    'achievements',
+    'positive_ratings',
+    'negative_ratings',
+    'total_ratings',
+    'rating',
+    'average_playtime',
+    'median_playtime',
+    'price',
+    'owners_low_bound',
+    'owners_high_bound',
+    #'rating_ratio',
+    #'linux',
+    #'mac',
+    #'windows',
+    'top_tag',
+    'type',
+    'total_playtime',
+    'estimated_revenue']
+
 explainQueryLanguage = '''
  Query Syntax: 
-    1) one Query per
+    1) one Query per row
     2) CSV formated, 3 Columns,  seperator=";", quotechar="'"
         filterType;Column;[item1,item2,...]
 filterTypes:
@@ -73,7 +108,8 @@ filterTypes:
         and => all items must be in the game
         or => one of the item must be in the game
         not => none of the items must be in the game
-        equals => excat these items items must be in the game (order does not matter)
+        equals => excat these items items must be in the game 
+                  (order does not matter)
     for single Value columns:
         smaller => game must be smaller than item
         bigger => game must be bigger than item
@@ -82,6 +118,36 @@ filterTypes:
 Examples:
 or;'platforms';[linux,mac]
 or;'categories';[Single-player]
+'''
+
+explainColumns = '''
+Multi item columns: 
+* developer
+* publisher
+* platforms
+* categories
+* genres
+* steamspy_tags
+
+Single item label columns:
+* name
+* top_tag (from steamspy tags)
+* type (Paid or Free)
+
+Single item numeric columns:
+* release_date
+* release_year
+* required_age 
+* achievements
+* average_playtime
+* median_playtime
+* price
+* owners_low_bound
+* owners_high_bound
+* rating
+* total_playtime
+* estimated_revenue (price*owner_low_bound)
+
 '''
 
 class DashboardCompoment:
@@ -97,10 +163,10 @@ class DashboardCompoment:
             dbc.CardBody(
                 [
                     html.Div(children=self.getFilterHTML()),
+                    html.Div(children=self.getTableHTML()),
                     html.Div(children=self.getScatterHTML()),
                     html.Div(children=self.getBarHTML()),
                     html.Div(children=self.getBoxHTML()),
-
                 ]
             ),
             className="mt-3",
@@ -109,7 +175,11 @@ class DashboardCompoment:
     def getFilterHTML(self):
         return [
             html.H2(children='Dataset filter'),
-                html.Pre(explainQueryLanguage),
+            dbc.Row([
+                dbc.Col(html.Pre(explainQueryLanguage)),
+                dbc.Col(html.Pre(explainColumns)),
+            ]),
+                
 
             dbc.Row(
                 [
@@ -250,6 +320,18 @@ class DashboardCompoment:
                 dcc.Graph(id="dashboard-bar"),
         ]
     
+    def getTableHTML(self):
+         return [
+            html.H3("first 25 Entries"),
+            dash_table.DataTable(
+                id='dashboard-table',
+                #fixed_columns={ 'headers': True, 'data': 1 },
+                #columns=[{"name": i, "id": i} for i in self.global_dashboard_df],
+                columns=[{"name": i, "id": i} for i in dashTableColumns],
+                style_table={'overflowX': 'auto','overflowY': 'auto','height': '300px',},
+            )
+         ]
+
     def initCallbacks(self):
         self.app.callback(
             Output('signal', 'children'),
@@ -277,11 +359,20 @@ class DashboardCompoment:
             Input("x-axis-bardashboard", "value"),
             Input("y-axis-bardashboard", "value"),
             Input("color-bardashboard", "value"))(self.createBar)
+        self.app.callback(
+            Output("dashboard-table", "data"),
+            Input('signal', 'children'))(self.createTable)
 
     def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,sortByType,dataPercent,textBox):
         self.global_dashboard_df = sortAndLimit2(self.pDF,dataSortBy,dataAscDesc,dataPercent,sortByType)
-        self.global_dashboard_df = multipleFilter(self.global_dashboard_df,parseFilterTextField(textBox))
+        #print("before lambdaArr parseFilterTextField")
+        lambdaArr = parseFilterTextField(textBox)
+        #print("after lambdaArr parseFilterTextField")
+        self.global_dashboard_df = multipleFilter(self.global_dashboard_df,lambdaArr)
         return n_clicks
+
+    def createTable(self,signal):
+        return self.global_dashboard_df.head(25).to_dict('records')
 
     def createScatter(self,signal,x, y,col,siz,config):
         df = self.global_dashboard_df
