@@ -30,7 +30,7 @@ dropdownLabelValues = [
     {'label': 'developer', 'value': 'developer'},
     {'label': 'name', 'value': 'name'},
     {'label': 'release_year', 'value': 'release_year'},
-    {'label': 'release_date', 'value': 'release_date'},
+    {'label': 'category', 'value': 'categories'},
 ]
 
 ascDesc = [
@@ -63,6 +63,27 @@ infoColumns = [
     'price'
  ]
 
+explainQueryLanguage = '''
+ Query Syntax: 
+    1) one Query per
+    2) CSV formated, 3 Columns,  seperator=";", quotechar="'"
+        filterType;Column;[item1,item2,...]
+filterTypes:
+    for List columns:
+        and => all items must be in the game
+        or => one of the item must be in the game
+        not => none of the items must be in the game
+        equals => excat these items items must be in the game (order does not matter)
+    for single Value columns:
+        smaller => game must be smaller than item
+        bigger => game must be bigger than item
+        same => item and game must match
+        notSame => item and game must be different
+Examples:
+or;'platforms';[linux,mac]
+or;'categories';[Single-player]
+'''
+
 class DashboardCompoment:
 
     def __init__(self,df,app): 
@@ -88,9 +109,11 @@ class DashboardCompoment:
     def getFilterHTML(self):
         return [
             html.H2(children='Dataset filter'),
+                html.Pre(explainQueryLanguage),
+
             dbc.Row(
                 [
-                    html.Article('Erklärung'),
+                    html.H3('Filter Query:'),
                     dcc.Textarea(
                         id='dashboard-filter-textfield',
                         value='',
@@ -257,6 +280,7 @@ class DashboardCompoment:
 
     def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,sortByType,dataPercent,textBox):
         self.global_dashboard_df = sortAndLimit2(self.pDF,dataSortBy,dataAscDesc,dataPercent,sortByType)
+        self.global_dashboard_df = multipleFilter(self.global_dashboard_df,parseFilterTextField(textBox))
         return n_clicks
 
     def createScatter(self,signal,x, y,col,siz,config):

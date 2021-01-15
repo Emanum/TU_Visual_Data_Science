@@ -1,6 +1,12 @@
 import itertools
 import pandas as pd
 
+import sys
+if sys.version_info[0] < 3: 
+    from StringIO import StringIO
+else:
+    from io import StringIO
+
 
 def andFilter(row,column,values):
     return set(values).issubset(set(row[column])) 
@@ -92,3 +98,71 @@ def getStatsDataFrame(df,columnname,combinations,filterType,ergType,statsColumns
 
     erg = pd.concat(series, axis=1,keys=names).transpose().fillna(0)
     return erg
+
+
+'''
+Query Syntax: 
+    1) one Query per
+    2) CSV formated, 3 Columns,  seperator=";", quotechar="'"
+        filterType;Column;[item1,item2,...]
+filterTypes:
+    for List columns:
+        and => all items must be in the game
+        or => one of the item must be in the game
+        not => none of the items must be in the game
+        equals => excat these items items must be in the game (order does not matter)
+    for single Value columns:
+        smaller => game must be smaller than item
+        bigger => game must be bigger than item#
+        same => item and game must match
+        notSame => item and game must be different
+Examples:
+or;'platforms';[linux,mac]
+or;'categories';[Single-player]
+
+return list of lambda
+'''
+def parseFilterTextField(text):
+    try:
+        csvResource = StringIO(text)
+        filterDF = pd.read_csv(csvResource, sep=";",quotechar="'",header=None,names=['filterType','column','filterItems'])
+        #handleMultipleItemColumn2(filterDF,'filterItems',',')
+        erg = []
+        for index, row in filterDF.iterrows():
+            if(row['filterType'] == 'or'):
+                erg.append(lambda x1: orFilter(x1,row['column'],convertToList(row['filterItems'])))
+            elif (row['filterType'] == 'and'):
+                erg.append(lambda x2: andFilter(x2,row['column'],convertToList(row['filterItems'])))
+            elif (row['filterType'] == 'not'):
+                erg.append(lambda x3: notFilter(x3,row['column'],convertToList(row['filterItems'])))
+            elif (row['filterType'] == 'equals'):
+                erg.append(lambda x4: equalsFilter(x4,row['column'],convertToList(row['filterItems'])))
+
+            elif (row['filterType'] == 'smaller'):
+                erg.append(lambda x5: smallerFilter(x5,row['column'],convertToNumber(row['filterItems'])))
+            elif (row['filterType'] == 'bigger'):
+                erg.append(lambda x6: biggerFilter(x6,row['column'],convertToNumber(row['filterItems'])))
+
+            elif (row['filterType'] == 'same'):
+                erg.append(lambda x7: sameFilter(x7,row['column'],convertToNumber(row['filterItems'])))
+            elif (row['filterType'] == 'notSame'):
+                erg.append(lambda x8: notFilter(x8,row['column'],convertToNumber(row['filterItems'])))
+        
+        return erg
+    except:
+        return []
+
+def handleMultipleItemColumn2(df,column,sep):
+    df[column+"_list"] = df[column].apply(lambda x: x[1:-1].split(sep))
+
+def convertToList(str):
+    return str[1:-1].split(",")
+
+def convertToNumber(str):
+    try:
+        if("." in str):
+            return float(str)
+        else:
+            return int(str)
+    except:
+        return str
