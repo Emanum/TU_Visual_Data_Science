@@ -64,7 +64,7 @@ labelformat=brace, position=top}
 \section{Dataset}
 
 I did choose a dataset containing PC games from the popular store Steam. The dataset was created around May 2019 and contains ~27.000 game entries with each one having 18 attributes.
-However, the dataset is not guaranteed to be complete. In addition, it has been already cleaned from unreleased titles and non-games like software. The original data source was the official Steam API and SteamSpy a website which collects all kind of stats from steam.
+However, the dataset is not guaranteed to be fully complete. In addition, it has been already cleaned from unreleased titles and non-games like software. The original data source was the official Steam API and SteamSpy a website which collects all kind of stats from steam.
 
 %\subsection{Data preparation}
 
@@ -250,26 +250,26 @@ I suspect that the main target platform for games is windows. In some cases game
     \label{fig:insight3_distro_plat} 
   \end{figure}
 
-  Additionally, I explored some statistics for the genre. In Figure \ref{fig:insight3_3} we can see that Single-player, steam trading cards and steam achievments seems popular for games. But when we look at the mean average playtime in Figure \ref{fig:insight3_4} we can see that these genres generate only small amounts of average playtime. MMO games on the other hand are not often released, but these games seems to be played way longer. 
+  Additionally, I explored some statistics for the genre. In Figure \ref{fig:insight3_3} we can see that Single-player, steam trading cards and steam achievements seems popular for games. But when we look at the mean average playtime in Figure \ref{fig:insight3_4} we can see that these genres generate only small amounts of average playtime. MMO games on the other hand are not often released, but these games seems to be played way longer. 
   Valve anti cheat and includes source SDK has probably a high playtime as some popular games are using these and maybe pushing up the stats. 
 
   \begin{figure}[h]
     \centering
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[h]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{graphics/insight3_graph3.png}
         \caption{total number of games}
         \label{fig:insight3_3}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[h]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{graphics/insight3_graph4.png}
-        \caption{mean average playtime, number of datasets in ()}
+        \caption{mean average playtime, x-label shows the number of datasets in ()}
         \label{fig:insight3_4}
     \end{subfigure}
     \vskip\baselineskip
-    \begin{subfigure}[b]{0.49\textwidth}
+    \begin{subfigure}[h]{0.49\textwidth}
         \centering
         \includegraphics[width=\textwidth]{graphics/insight3_graph6.png}
         \caption{Mean of the owners per genres}
@@ -282,7 +282,16 @@ I suspect that the main target platform for games is windows. In some cases game
 \section{Comparison exploration vs. confirmation}
 
 As I had never done any data exploration before and had to get familiar with the tools, my processes was the following: I began with preparing the data and calculating additional columns based on my knowledge and assumptions of the dataset. Furthermore, I generated a lot of bar chart distributions with different Filter to get a better understanding of the data and what columns and games are different from other and maybe ruin my plots as we saw the top 3 games are not really comparable to the rest.
-Then I decided to analyze different combinations with the scatter plot in the dashboard where I found a possible correlation between release date and rating. Lastly I build the scripts to quickly filter and compare statistics of different subsets. My process of statistical confirmation was mainly to compare absolute numbers of sums, means, percentage of games fulfilling certain conditions. In my opinion this is correct as I have all the data available anyway.\\
+Then I decided to analyze different combinations with the scatter plot in the dashboard where I found a possible correlation between release date and rating. Lastly I build the scripts to quickly filter and compare statistics of different subsets. My process of statistical confirmation was mainly to compare absolute numbers of sums, means, percentage of games fulfilling certain conditions.\\
 However not all insights turned out to be true when considering multiple graphs and values. 
+
+\section{Dashboard}
+
+The target audience for my dashboard are people with an interest for gaming and current/historical trends in the industry. 
+So I designed the dashboard with a bit of background knowledge about steam and online game stores in general in mind. 
+The goal is not to present some particular already known facts for a specific reason but more to let people discover on their one. I want to give the users the tools they need to answer their own questions.
+
+Therefore, the dashboard supports the dynamically filtering I also used during my analysis phase. The users can define their own filter queries, sort and limit the displayed items. The resulting dataset is then presented in different graphs, each one able to change the displayed axis, columns, size and color encoding. As a starting point I also included some of my own plots used for the report in a separated tab. This should give the users a first impression of the data. 
+
 
 \end{document}
