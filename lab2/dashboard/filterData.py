@@ -62,6 +62,8 @@ def getAllCombinations(stuff):
     erg.pop()
     return erg
 
+def get_unique_list(series):
+    return set(list(itertools.chain(*series.apply(lambda x: [c for c in x]))))
 
 def splitList(list):
     erg = []
@@ -86,7 +88,7 @@ def getStatsDataFrame(df,columnname,combinations,filterType,ergType,statsColumns
                               lambda row: andFilter(row,columnname,combination)
                           ])
         if(ergType=='mean'):  
-            ser = filterErg[statsColumns].mean(numeric_only=False)
+            ser = filterErg[statsColumns].mean(numeric_only=True)
         elif(ergType=='median'):  
             ser = filterErg.median(numeric_only=True)
         elif(ergType=='sum'):  

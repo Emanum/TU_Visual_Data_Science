@@ -5,6 +5,9 @@ import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 import plotly.express as px
+import plotly.graph_objects as go
+from sklearn import preprocessing
+from radarChart import *
 from filterData import * 
 
 import inspect
@@ -173,6 +176,8 @@ class DashboardCompoment:
                     html.Div(children=self.getScatterHTML()),
                     html.Div(children=self.getBarHTML()),
                     html.Div(children=self.getBoxHTML()),
+                    html.Div(children=self.getRadialHTML()),
+
                 ]
             ),
             className="mt-3",
@@ -326,6 +331,12 @@ class DashboardCompoment:
                 dcc.Graph(id="dashboard-bar"),
         ]
     
+    def getRadialHTML(self):
+            return [
+                html.H3("Radial Stats Chart"),
+                dcc.Graph(id="dashboard-radial"),
+            ]
+
     def getTableHTML(self):
          return [
             dbc.Row([
@@ -374,6 +385,9 @@ class DashboardCompoment:
         self.app.callback(
             Output("dashboard-table", "data"),
             Input('signal', 'children'))(self.createTable)
+        self.app.callback(
+            Output("dashboard-radial", "figure"),
+            Input('signal', 'children'))(self.createRadar)
 
     def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,sortByType,dataPercent,textBox):
         self.global_dashboard_df = sortAndLimit2(self.pDF,dataSortBy,dataAscDesc,dataPercent,sortByType)
@@ -409,4 +423,43 @@ class DashboardCompoment:
         df = self.global_dashboard_df
         fig = px.bar(df, x=x, y=y,color=col,hover_name="name", hover_data=infoColumns,)
         fig.update_layout(autosize=True,height=750)
+        return fig
+
+    def createRadar(self,signal):
+        stats = getStatsDataFrame(
+                    df = self.global_dashboard_df,
+                    columnname = 'platforms',
+                    combinations = splitList(get_unique_list(self.global_dashboard_df['platforms'])),
+                    filterType = 'or',ergType='mean',statsColumns=statsColumns)
+
+        #add row with zero values to force minMaxScaler to begin at zero
+        stats.loc[len(stats)] = 0
+
+        x = stats.values.astype(float)
+        min_max_scaler = preprocessing.MinMaxScaler()
+        x_scaled = min_max_scaler.fit_transform(x)
+        rowNames = stats.index.to_list()
+        stats_normalized = pd.DataFrame(x_scaled, stats.index, stats.columns)
+
+        #delete row again to hide in the graph
+        stats_normalized.drop(stats_normalized.tail(1).index,inplace=True)
+
+        fig = go.Figure()
+        for index, row in stats_normalized.iterrows():
+            fig.add_trace(go.Scatterpolar(
+                r=row.to_list(),
+                theta=stats_normalized.columns.to_list(),
+                #fill='toself',
+                name=index
+            ))
+        fig.update_polars(radialaxis_autorange=True)
+        '''fig.update_layout(
+            polar=dict(
+                radialaxis=dict(
+                visible=True,
+                range=[0, 5]
+                )),
+            showlegend=False
+        )
+        '''
         return fig
