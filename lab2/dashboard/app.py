@@ -88,50 +88,6 @@ barFig4 = barChartAllYearsName(pDF,top)
 #Boxplot
 boxplot1 = px.box(pDF, y="total_playtime")
 
-# Scatter Charts
-#scatter1 = scatterChart(tptPDF,'total_playtime','owners_low_bound',col='top_tag',siz='rating')
-#scatter2 = scatterChart(tptPDF,'rating','price',col='developer',siz='windows')
-
-def filterData(df,dataSortBy,dataAscDesc,dataPercent):
-    asc = dataAscDesc == 'asc'
-    rowNr = int(len(df)*(dataPercent/100))
-    return df.sort_values(by=dataSortBy,ascending=asc).head(rowNr)
-
-@app.callback(
-    Output("scatter-plot-1", "figure"), 
-    [Input("x-axis-scatter1", "value"), 
-     Input("y-axis-scatter1", "value"),
-     Input("size-scatter1", "value"),
-     Input("color-scatter1", "value"),
-     Input("config-scatter1", "value"),
-     Input("data-sortBy-scatter1", "value"),
-     Input("data-ascdesc-scatter1", "value"),
-     Input("data-percentage-scatter1", "value"),
-     ])
-def generate_scatter1(x, y,siz,col,config,dataSortBy,dataAscDesc,dataPercent):
-    dataProc = sortAndLimit(df,dataSortBy,dataAscDesc,dataPercent)
-    if('color' in config and 'size' in config):
-        fig = px.scatter(dataProc, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
-    elif('color' in config):
-        fig = px.scatter(dataProc, x=x, y=y, color=col,hover_name="name", hover_data=infoColumns,trendline="ols")
-    elif('size' in config):
-        fig = px.scatter(dataProc, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
-    else:
-        fig = px.scatter(dataProc, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="ols")
-    fig.update_layout(autosize=True, height=1250)
-    return fig
-
-@app.callback(
-    Output("custom-box-plot", "figure"), 
-    [Input("y-axis-box1", "value"), 
-     Input("data-sortBy-box1", "value"),
-     Input("data-ascdesc-box1", "value"),
-     Input("data-percentage-box1", "value")
-     ])
-def generate_box1(y,dataSortBy,dataAscDesc,dataPercent):
-    dataProc = sortAndLimit(df,dataSortBy,dataAscDesc,dataPercent)
-    return px.box(dataProc,y=y,hover_name="name", hover_data=infoColumns)
-
 
 # ----- INIT CACHE -----
 #TODO use cache
@@ -188,127 +144,18 @@ presentationTab = dbc.Card(
     className="mt-3",
 )
 
-explorationTab = dbc.Card(
-    dbc.CardBody(
-        [
-            html.H2(children='Customizable Box Plot'),
-
-            html.H5("Datasource:"),
-            html.P("sortBy:"),
-            dcc.Dropdown(
-                id='data-sortBy-box1', 
-                options=dropdownNumericalValues,
-                value='total_playtime'
-            ),
-            dcc.Dropdown(
-                id='data-ascdesc-box1', 
-                options = ascDesc,
-                value='desc'
-            ),
-            html.P("percentage of data:"),
-            dcc.Slider(
-                id='data-percentage-box1',
-                min=0,
-                max=100,
-                step=1,
-                value=10,
-                tooltip={
-                    'always_visible':True,
-                    'placement':'bottom'
-                }
-            ),
-            html.P("y-axis:"),
-            dcc.Dropdown(
-                id='y-axis-box1', 
-                options=dropdownNumericalValues,
-                value='total_playtime'
-            ),
-            dcc.Graph(id="custom-box-plot"),
-
-            html.H2(children='Customizable Scatter Plot'),
-
-            html.H5("Datasource:"),
-            html.P("sortBy:"),
-            dcc.Dropdown(
-                id='data-sortBy-scatter1', 
-                options=dropdownNumericalValues,
-                value='total_playtime'
-            ),
-            dcc.Dropdown(
-                id='data-ascdesc-scatter1', 
-                options = ascDesc,
-                value='desc'
-            ),
-            html.P("percentage of data:"),
-            dcc.Slider(
-                id='data-percentage-scatter1',
-                min=0,
-                max=100,
-                step=1,
-                value=1,
-                tooltip={
-                    'always_visible':True,
-                    'placement':'bottom'
-                }
-            ),
-            html.P("x-axis:"),
-            dcc.Dropdown(
-                id='x-axis-scatter1', 
-                options=dropdownNumericalValues,
-                value='total_playtime'
-            ),
-            html.P("y-axis:"),
-            dcc.Dropdown(
-                id='y-axis-scatter1', 
-                options=dropdownNumericalValues,
-                value='total_playtime'
-            ),
-            html.P("Config:"),
-            dcc.Checklist(
-                id='config-scatter1', 
-                options=[
-                    {'label': 'enable color', 'value': 'color'},
-                    {'label': 'enable size', 'value': 'size'}
-                ],
-                value=[],
-                labelStyle={'display': 'inline-block'}
-            ),
-            html.P("color:"),
-            dcc.Dropdown(
-                id='color-scatter1', 
-                options=dropdownLabelValues,
-                value='type'
-            ),
-            html.P("size:"),
-            dcc.Dropdown(
-                id='size-scatter1', 
-                options=dropdownNumericalValues,
-                value='price'
-            ),
-            dcc.Graph(id="scatter-plot-1"),
-        ]
-    ),
-    className="mt-3",
-)
-
-
-
 app.layout = dbc.Container([
     html.H1(children='Steam Game Data'),
     dbc.Tabs(
         [
             dbc.Tab(dashboard, label="Dashboard"),
             dbc.Tab(presentationTab, label="Presentation"),
-            dbc.Tab(explorationTab, label="Exploration"),
         ]
     ),
 
     html.Div(id='signal', style={'display': 'none'})
 
 ], fluid=True)
-
-
-
 
 if __name__ == '__main__':
     app.run_server(debug=True)

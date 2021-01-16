@@ -440,9 +440,7 @@ class DashboardCompoment:
 
     def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,sortByType,dataPercent,textBox):
         self.global_dashboard_df = sortAndLimit2(self.pDF,dataSortBy,dataAscDesc,dataPercent,sortByType)
-        #print("before lambdaArr parseFilterTextField")
         lambdaArr = parseFilterTextField(textBox)
-        #print("after lambdaArr parseFilterTextField")
         self.global_dashboard_df = multipleFilter(self.global_dashboard_df,lambdaArr)
         return n_clicks,str(self.global_dashboard_df.shape[0])
 
@@ -451,6 +449,8 @@ class DashboardCompoment:
 
     def createScatter(self,signal,x, y,col,siz,config):
         df = self.global_dashboard_df
+        if isinstance(df[col].iloc[0],list):
+            df[col] = df[col].apply(lambda x: tuple(x))
         if('color' in config and 'size' in config):
             fig = px.scatter(df, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
         elif('color' in config):
@@ -470,18 +470,18 @@ class DashboardCompoment:
 
     def createBar(self,signal,x,y,col):
         df = self.global_dashboard_df
+        if isinstance(df[col].iloc[0],list):
+            df[col] = df[col].apply(lambda x: tuple(x))
         fig = px.bar(df, x=x, y=y,color=col,hover_name="name", hover_data=infoColumns,)
         fig.update_layout(autosize=True,height=750)
         return fig
 
     def createRadar(self,clicks,signal,columnParam,statstype,filtertype):
-
         stats = getStatsDataFrame(
                     df = self.global_dashboard_df,
                     columnname = columnParam,
                     combinations = splitList(get_unique_combined(self.global_dashboard_df[columnParam])),
                     filterType = filtertype,ergType=statstype,statsColumns=statsColumns)
-
         #add row with zero values to force minMaxScaler to begin at zero
         stats.loc[len(stats)] = 0
 
@@ -502,7 +502,6 @@ class DashboardCompoment:
                 #fill='toself',
                 name=index
             ))
-
         fig.update_polars(radialaxis_autorange=True)
         '''fig.update_layout(
             polar=dict(
