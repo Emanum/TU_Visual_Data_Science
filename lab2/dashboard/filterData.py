@@ -34,7 +34,6 @@ def notSameFilter(row,column,values):
 
 def multipleFilter(df, funcArr):
     erg = df
-    #print(str(funcArr))
     for func in funcArr:
         erg = erg[erg.apply(lambda row: func(row), axis=1)]
     return erg
@@ -69,7 +68,7 @@ def get_unique(series):
     return set(list(itertools.chain(*series.apply(lambda x: [c for c in x.split(';')]))))
 
 def get_unique_combined(series):
-    if(isinstance(series[0],list)):
+    if(isinstance(series.iloc[0],list)):
         return get_unique_list(series)
     else:
         return get_unique(series)
@@ -147,7 +146,6 @@ def parseFilterTextField(text):
             filterType = dfrow['filterType']
             column = dfrow['column']
             filterItems = dfrow['filterItems']
-            #print(filterType+" " + column + " " +str(filterItems))
             if(filterType == 'or'):
                 erg.append(lambda r,column=column,filterItems=filterItems: orFilter(r,column,convertToList(filterItems)))
             elif (filterType == 'and'):

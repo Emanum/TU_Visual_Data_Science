@@ -493,7 +493,7 @@ class DashboardCompoment:
 
         #delete row again to hide in the graph
         stats_normalized.drop(stats_normalized.tail(1).index,inplace=True)
-
+        
         fig = go.Figure()
         for index, row in stats_normalized.iterrows():
             fig.add_trace(go.Scatterpolar(
@@ -502,6 +502,7 @@ class DashboardCompoment:
                 #fill='toself',
                 name=index
             ))
+
         fig.update_polars(radialaxis_autorange=True)
         '''fig.update_layout(
             polar=dict(
