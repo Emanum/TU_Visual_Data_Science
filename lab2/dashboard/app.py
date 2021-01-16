@@ -305,7 +305,7 @@ app.layout = dbc.Container([
 
     html.Div(id='signal', style={'display': 'none'})
 
-])
+], fluid=True)
 
 
 

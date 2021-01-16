@@ -2,10 +2,10 @@ import itertools
 import pandas as pd
 
 import sys
-if sys.version_info[0] < 3: 
-    from StringIO import StringIO
-else:
-    from io import StringIO
+#if sys.version_info[0] < 3: 
+#    from StringIO import StringIO
+#else:
+from io import StringIO
 
 
 def andFilter(row,column,values):
@@ -64,6 +64,16 @@ def getAllCombinations(stuff):
 
 def get_unique_list(series):
     return set(list(itertools.chain(*series.apply(lambda x: [c for c in x]))))
+
+def get_unique(series):
+    return set(list(itertools.chain(*series.apply(lambda x: [c for c in x.split(';')]))))
+
+def get_unique_combined(series):
+    if(isinstance(series[0],list)):
+        return get_unique_list(series)
+    else:
+        return get_unique(series)
+
 
 def splitList(list):
     erg = []

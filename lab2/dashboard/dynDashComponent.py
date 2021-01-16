@@ -7,7 +7,6 @@ import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
 from sklearn import preprocessing
-from radarChart import *
 from filterData import * 
 
 import inspect
@@ -37,6 +36,19 @@ dropdownLabelValues = [
     {'label': 'name', 'value': 'name'},
     {'label': 'release_year', 'value': 'release_year'},
     {'label': 'category', 'value': 'categories'},
+]
+
+dropdownStatsTypeValues = [
+    {'label': 'mean', 'value': 'mean'},
+    {'label': 'median', 'value': 'median'},
+    {'label': 'sum', 'value': 'sum'},
+    {'label': 'var', 'value': 'var'},
+]
+
+dropdownStatsFilterCombinationValues = [
+    {'label': 'equals', 'value': 'equals'},
+    {'label': 'or', 'value': 'or'},
+    {'label': 'and', 'value': 'and'},
 ]
 
 ascDesc = [
@@ -334,7 +346,39 @@ class DashboardCompoment:
     def getRadialHTML(self):
             return [
                 html.H3("Radial Stats Chart"),
-                dcc.Graph(id="dashboard-radial"),
+                dbc.Col([
+                    dbc.Row([
+                        dbc.Col(dcc.Graph(id="dashboard-radial"),width=7),
+                        dbc.Col([
+                            html.P("Column"),
+                            dcc.Input(
+                                id='dashboard-stats-column',
+                                type="text", placeholder="",
+                                value="platforms"
+                            ),
+                            html.P("Combination type"),
+                            dcc.Dropdown(
+                                id='dashboard-stats-filter-type', 
+                                options=dropdownStatsFilterCombinationValues,
+                                value='or'
+                            ), 
+                            #html.P("Combinations"),
+                            #dcc.Input(
+                            #    id='dashboard-stats-combinations',
+                            #    type="text", placeholder="all"
+                            #),
+                            html.P("Stats type"), 
+                            dcc.Dropdown(
+                                id='dashboard-stats-type', 
+                                options=dropdownStatsTypeValues,
+                                value='mean'
+                            ), 
+                            
+                            html.Button('Update Stats', id='update-stats', n_clicks=0)
+                        ],width=3),
+                    ])
+                ])
+
             ]
 
     def getTableHTML(self):
@@ -387,7 +431,12 @@ class DashboardCompoment:
             Input('signal', 'children'))(self.createTable)
         self.app.callback(
             Output("dashboard-radial", "figure"),
-            Input('signal', 'children'))(self.createRadar)
+            Input('signal', 'children'),
+            Input('update-stats','n_clicks'),
+            State('dashboard-stats-column', 'value'),
+            #State('dashboard-stats-combinations', 'value'),
+            State('dashboard-stats-type', 'value'),
+            State('dashboard-stats-filter-type', 'value'),)(self.createRadar)
 
     def updateFilteredData(self,n_clicks,dataSortBy,dataAscDesc,sortByType,dataPercent,textBox):
         self.global_dashboard_df = sortAndLimit2(self.pDF,dataSortBy,dataAscDesc,dataPercent,sortByType)
@@ -425,12 +474,13 @@ class DashboardCompoment:
         fig.update_layout(autosize=True,height=750)
         return fig
 
-    def createRadar(self,signal):
+    def createRadar(self,clicks,signal,columnParam,statstype,filtertype):
+
         stats = getStatsDataFrame(
                     df = self.global_dashboard_df,
-                    columnname = 'platforms',
-                    combinations = splitList(get_unique_list(self.global_dashboard_df['platforms'])),
-                    filterType = 'or',ergType='mean',statsColumns=statsColumns)
+                    columnname = columnParam,
+                    combinations = splitList(get_unique_combined(self.global_dashboard_df[columnParam])),
+                    filterType = filtertype,ergType=statstype,statsColumns=statsColumns)
 
         #add row with zero values to force minMaxScaler to begin at zero
         stats.loc[len(stats)] = 0
@@ -462,4 +512,5 @@ class DashboardCompoment:
             showlegend=False
         )
         '''
+        fig.update_layout(autosize=True,height=750)
         return fig
