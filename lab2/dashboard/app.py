@@ -20,7 +20,7 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=[dbc.themes.BOOTSTRAP])
 
 # INIT
-df = pd.read_csv(filepath_or_buffer = '/Users/Manuel 1/Desktop/TU_Visual_Data_Science/lab2/dashboard/data/steam.csv',sep=',', decimal = ".")
+df = pd.read_csv(filepath_or_buffer = 'F:\dev\studium\Visual_Data_Science\lab2\datasets\steam\steam.csv',sep=',', decimal = ".")
 pDF = pre_process(df)
 #topPDF = topDataset(50,pDF)
 tptPDF = pDF.sort_values('total_playtime',ascending=False).head(math.ceil(27075*0.01))

@@ -16,7 +16,6 @@ dropdownNumericalValues = [
     {'label': 'owners_low_bound', 'value': 'owners_low_bound'},
     {'label': 'release_year', 'value': 'release_year'},
     {'label': 'rating', 'value': 'rating'},
-    {'label': 'release_year', 'value': 'release_year'},
     {'label': 'release_date', 'value': 'release_date'},
     {'label': 'required_age', 'value': 'required_age'},
     {'label': 'achievements', 'value': 'achievements'},
@@ -197,7 +196,7 @@ class DashboardCompoment:
 
     def getFilterHTML(self):
         return [
-            html.H2(children='Dataset filter'),
+            html.H1(children='1. Filter Data'),
             dbc.Row([
                 dbc.Col(html.Pre(explainQueryLanguage)),
                 dbc.Col(html.Pre(explainColumns)),
@@ -214,6 +213,7 @@ class DashboardCompoment:
                     ),
                 ]
             ),
+            html.H1(children='2. Limit Displayed Data'),
             dbc.Row([
                 html.P("sortBy:"),
                 dbc.Col(dcc.Dropdown(
@@ -241,6 +241,7 @@ class DashboardCompoment:
 
     def getScatterHTML(self):
             return [
+                html.H1(children='3. Explore Data'),
                 html.H3("Scatter Plot"),
                 dbc.Row([
                     html.P("x-axis:"),
@@ -345,6 +346,7 @@ class DashboardCompoment:
     
     def getRadialHTML(self):
             return [
+                html.H1(children='4. Compare Data Statistics'),
                 html.H3("Radial Stats Chart"),
                 dbc.Col([
                     dbc.Row([
@@ -452,13 +454,13 @@ class DashboardCompoment:
         if isinstance(df[col].iloc[0],list):
             df[col] = df[col].apply(lambda x: tuple(x))
         if('color' in config and 'size' in config):
-            fig = px.scatter(df, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
+            fig = px.scatter(df, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="lowess")
         elif('color' in config):
-            fig = px.scatter(df, x=x, y=y, color=col,hover_name="name", hover_data=infoColumns,trendline="ols")
+            fig = px.scatter(df, x=x, y=y, color=col,hover_name="name", hover_data=infoColumns,trendline="lowess")
         elif('size' in config):
-            fig = px.scatter(df, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns,trendline="ols")
+            fig = px.scatter(df, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns,trendline="lowess")
         else:
-            fig = px.scatter(df, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="ols")
+            fig = px.scatter(df, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="lowess")
         fig.update_layout(autosize=True,height=800)
         return fig
     
