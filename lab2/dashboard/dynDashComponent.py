@@ -134,6 +134,8 @@ or;'platforms';[linux,mac]
 or;'categories';[Single-player]
 or;'developer';[Valve]
 
+and;'categories';[Single-player,Multi-player]
+
 ignore top3 games:
 notSame;'appid';570
 notSame;'appid';578080
@@ -208,7 +210,7 @@ class DashboardCompoment:
                     html.H3('Filter Query:'),
                     dcc.Textarea(
                         id='dashboard-filter-textfield',
-                        value='',
+                        value="and;'categories';[Multi-player,Single-player]",
                         style={'width': '100%', 'height': 150},
                     ),
                 ]
@@ -249,7 +251,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='x-axis-scatterdashboard', 
                             options=dropdownNumericalValues,
-                            value='release_date'
+                            value='rating'
                         )
                     ),
                     html.P("y-axis:"),
@@ -257,7 +259,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='y-axis-scatterdashboard', 
                             options=dropdownNumericalValues,
-                            value='rating'
+                            value='total_playtime'
                         )
                     ),
                 ]),
@@ -270,7 +272,7 @@ class DashboardCompoment:
                                 {'label': 'enable color', 'value': 'color'},
                                 {'label': 'enable size', 'value': 'size'}
                             ],
-                            value=[],
+                            value=['color','size'],
                             labelStyle={'display': 'inline-block'}
                         ),                       
                     ),
@@ -289,7 +291,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='size-scatterdashboard', 
                             options=dropdownNumericalValues,
-                            value='price'
+                            value='owners_low_bound'
                         ),
                     ),
                 ]),
@@ -321,7 +323,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='x-axis-bardashboard', 
                             options=dropdownLabelValues,
-                            value='top_tag'
+                            value='type'
                         )
                     ),
                     html.P("y-axis:"),
@@ -329,7 +331,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='y-axis-bardashboard', 
                             options=dropdownNumericalValues,
-                            value='owners_low_bound'
+                            value='total_playtime'
                         )
                     ),
                     html.P("color:"),
@@ -337,7 +339,7 @@ class DashboardCompoment:
                         dcc.Dropdown(
                             id='color-bardashboard', 
                             options=dropdownLabelValues,
-                            value='release_year'
+                            value='top_tag'
                         ), 
                     ),
                 ]),
@@ -454,13 +456,13 @@ class DashboardCompoment:
         if isinstance(df[col].iloc[0],list):
             df[col] = df[col].apply(lambda x: tuple(x))
         if('color' in config and 'size' in config):
-            fig = px.scatter(df, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns,trendline="lowess")
+            fig = px.scatter(df, x=x, y=y, color=col,size=siz,hover_name="name", hover_data=infoColumns)
         elif('color' in config):
-            fig = px.scatter(df, x=x, y=y, color=col,hover_name="name", hover_data=infoColumns,trendline="lowess")
+            fig = px.scatter(df, x=x, y=y, color=col,hover_name="name", hover_data=infoColumns)
         elif('size' in config):
-            fig = px.scatter(df, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns,trendline="lowess")
+            fig = px.scatter(df, x=x, y=y, size=siz,hover_name="name", hover_data=infoColumns)
         else:
-            fig = px.scatter(df, x=x, y=y,hover_name="name", hover_data=infoColumns,trendline="lowess")
+            fig = px.scatter(df, x=x, y=y,hover_name="name", hover_data=infoColumns)
         fig.update_layout(autosize=True,height=800)
         return fig
     
